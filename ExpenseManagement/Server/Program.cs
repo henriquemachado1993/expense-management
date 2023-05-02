@@ -1,28 +1,34 @@
-using ExpenseManagement.Server.Data;
-using ExpenseManagement.Server.Models;
+using ExpenseManagement.Domain.Entities;
+using ExpenseManagement.Domain.Helpers;
+using ExpenseManagement.Infra;
+using ExpenseManagement.Infra.Contexts;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 31));
+builder.Services.AddDbContext<ExpenseManagementContext>(options =>
+    options.UseMySql(connectionString, serverVersion, b => b.MigrationsAssembly("ExpenseManagement.Server")));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddDefaultIdentity<User>(
+    //options => options.SignIn.RequireConfirmedAccount = true
+    )
+    .AddEntityFrameworkStores<ExpenseManagementContext>();
 
 builder.Services.AddIdentityServer()
-    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+    .AddApiAuthorization<User, ExpenseManagementContext>();
 
 builder.Services.AddAuthentication()
     .AddIdentityServerJwt();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+DependenciesInjector.Register(builder.Services);
 
 var app = builder.Build();
 
@@ -38,6 +44,8 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+ConfigHelper.SetEnvironment(app.Environment);
 
 app.UseHttpsRedirection();
 
