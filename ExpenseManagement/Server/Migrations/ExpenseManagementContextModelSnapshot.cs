@@ -160,7 +160,7 @@ namespace ExpenseManagement.Server.Migrations
                     b.ToTable("PersistedGrants", (string)null);
                 });
 
-            modelBuilder.Entity("ExpenseManagement.Domain.Entities.BankAccounts", b =>
+            modelBuilder.Entity("ExpenseManagement.Shared.Entities.BankAccounts", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -190,11 +190,9 @@ namespace ExpenseManagement.Server.Migrations
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("UserIdentifier")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("UserName")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
@@ -204,7 +202,7 @@ namespace ExpenseManagement.Server.Migrations
                     b.ToTable("BankAccounts", (string)null);
                 });
 
-            modelBuilder.Entity("ExpenseManagement.Domain.Entities.Category", b =>
+            modelBuilder.Entity("ExpenseManagement.Shared.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -216,7 +214,6 @@ namespace ExpenseManagement.Server.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("LastModifiedAt")
@@ -224,7 +221,6 @@ namespace ExpenseManagement.Server.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("PathImage")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Title")
@@ -232,11 +228,9 @@ namespace ExpenseManagement.Server.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("UserIdentifier")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("UserName")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
@@ -244,7 +238,7 @@ namespace ExpenseManagement.Server.Migrations
                     b.ToTable("Category", (string)null);
                 });
 
-            modelBuilder.Entity("ExpenseManagement.Domain.Entities.Expense", b =>
+            modelBuilder.Entity("ExpenseManagement.Shared.Entities.Expense", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -281,11 +275,9 @@ namespace ExpenseManagement.Server.Migrations
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("UserIdentifier")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("UserName")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
@@ -297,7 +289,7 @@ namespace ExpenseManagement.Server.Migrations
                     b.ToTable("Expense", (string)null);
                 });
 
-            modelBuilder.Entity("ExpenseManagement.Domain.Entities.User", b =>
+            modelBuilder.Entity("ExpenseManagement.Shared.Entities.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
@@ -505,9 +497,9 @@ namespace ExpenseManagement.Server.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ExpenseManagement.Domain.Entities.BankAccounts", b =>
+            modelBuilder.Entity("ExpenseManagement.Shared.Entities.BankAccounts", b =>
                 {
-                    b.HasOne("ExpenseManagement.Domain.Entities.User", "User")
+                    b.HasOne("ExpenseManagement.Shared.Entities.User", "User")
                         .WithMany("BankAccounts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -516,15 +508,15 @@ namespace ExpenseManagement.Server.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ExpenseManagement.Domain.Entities.Expense", b =>
+            modelBuilder.Entity("ExpenseManagement.Shared.Entities.Expense", b =>
                 {
-                    b.HasOne("ExpenseManagement.Domain.Entities.Category", "Category")
+                    b.HasOne("ExpenseManagement.Shared.Entities.Category", "Category")
                         .WithMany("Expenses")
                         .HasForeignKey("CategoryId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ExpenseManagement.Domain.Entities.User", "User")
+                    b.HasOne("ExpenseManagement.Shared.Entities.User", "User")
                         .WithMany("Expenses")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -546,7 +538,7 @@ namespace ExpenseManagement.Server.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("ExpenseManagement.Domain.Entities.User", null)
+                    b.HasOne("ExpenseManagement.Shared.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -555,7 +547,7 @@ namespace ExpenseManagement.Server.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("ExpenseManagement.Domain.Entities.User", null)
+                    b.HasOne("ExpenseManagement.Shared.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -570,7 +562,7 @@ namespace ExpenseManagement.Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ExpenseManagement.Domain.Entities.User", null)
+                    b.HasOne("ExpenseManagement.Shared.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -579,19 +571,19 @@ namespace ExpenseManagement.Server.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("ExpenseManagement.Domain.Entities.User", null)
+                    b.HasOne("ExpenseManagement.Shared.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ExpenseManagement.Domain.Entities.Category", b =>
+            modelBuilder.Entity("ExpenseManagement.Shared.Entities.Category", b =>
                 {
                     b.Navigation("Expenses");
                 });
 
-            modelBuilder.Entity("ExpenseManagement.Domain.Entities.User", b =>
+            modelBuilder.Entity("ExpenseManagement.Shared.Entities.User", b =>
                 {
                     b.Navigation("BankAccounts");
 

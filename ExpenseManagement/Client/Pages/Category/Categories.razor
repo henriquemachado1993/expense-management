@@ -1,5 +1,7 @@
 ﻿@page "/categories"
-@using ExpenseManagement.Shared.Models.Category
+@using ExpenseManagement.Shared.Entities
+@using ExpenseManagement.Shared.Helpers
+@using ExpenseManagement.Shared.ValueObjects
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using ExpenseManagement.Shared
@@ -10,13 +12,25 @@
 
 <h1>Categorias</h1>
 
+@if (Alerts.Any())
+{
+    @foreach (var alert in Alerts)
+    {
+        <div class="alert alert-@alert.TypeCustom alert-dismissible fade show" role="alert">
+            @alert.Message
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+}
+
 @if (categories == null)
 {
     <p><em>Carregando...</em></p>
 }
 else
 {
-    <NavLink class="btn btn-primary" href="categories/add">Novo</NavLink><br />
+    <NavLink class="btn btn-primary" href="categories/add">Novo</NavLink>
+    <br />
 
     <table class="table">
         <thead>
@@ -28,7 +42,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var category in categories)
+            @foreach (var category in categories.Data)
             {
                 <tr>
                     <td>@category.Id</td>
@@ -36,7 +50,7 @@ else
                     <td>@category.Description</td>
                     <td>
                         <NavLink class="btn btn-primary" href="categories/update">Alterar</NavLink>
-                        <button class="btn btn-primary" @onclick="()=>Remove(category.Id)">Excluir</button>
+                        <button class="btn btn-primary" @onclick="()=>Delete(category.Id)">Excluir</button>
                     </td>
                 </tr>
             }
@@ -45,22 +59,60 @@ else
 }
 
 @code {
-    private CategoryModel[]? categories;
+    private BusinessResult<List<Category>>? categories;
+    public List<MessageResult> Alerts = new();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            categories = await Http.GetFromJsonAsync<CategoryModel[]>("Category");
+            categories = await Http.GetFromJsonAsync<BusinessResult<List<Category>>>("Category");
+            if (categories != null && !categories.IsValid)
+            {
+                foreach (var message in categories.Messages)
+                    AlertHelper.AddError(Alerts, message.Message);
+            }
         }
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
         }
+        catch (Exception ex)
+        {
+            AlertHelper.AddError(Alerts, ex.Message);
+        }
     }
 
-    private void Remove(int id)
+    private async Task Delete(int id)
     {
-        
+        try
+        {
+            var httpResponse = await Http.DeleteAsync($"Category/{id}");
+
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException(
+                    $"Houve um problema. Status Code: {httpResponse.StatusCode}");
+            }
+            else
+            {
+                var response = await httpResponse.Content.ReadFromJsonAsync<BusinessResult<bool>>();
+                if (response != null && !response.IsValid)
+                {
+                    foreach (var message in response.Messages)
+                        AlertHelper.AddError(Alerts, message.Message);
+                }
+                else
+                {
+                    // remove o item da lista
+                    categories.Data = categories.Data.Where(x => x.Id != id).ToList();
+                    AlertHelper.AddSuccess(Alerts, "Deletado com sucesso.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            AlertHelper.AddError(Alerts, ex.Message);
+        }
     }
 }

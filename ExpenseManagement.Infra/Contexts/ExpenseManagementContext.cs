@@ -1,5 +1,5 @@
 ﻿using Duende.IdentityServer.EntityFramework.Options;
-using ExpenseManagement.Domain.Entities;
+using ExpenseManagement.Shared.Entities;
 using ExpenseManagement.Infra.Mappings;
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.EntityFrameworkCore;

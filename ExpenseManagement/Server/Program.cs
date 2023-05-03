@@ -1,5 +1,5 @@
-using ExpenseManagement.Domain.Entities;
-using ExpenseManagement.Domain.Helpers;
+using ExpenseManagement.Shared.Entities;
+using ExpenseManagement.Shared.Helpers;
 using ExpenseManagement.Infra;
 using ExpenseManagement.Infra.Contexts;
 using Microsoft.AspNetCore.Authentication;
@@ -27,6 +27,16 @@ builder.Services.AddAuthentication()
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+builder.Services.AddControllers(options => { options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true; });
+//.AddJsonOptions(options =>
+//{
+//    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+//}).AddNewtonsoftJson(options =>
+//{
+//    options.SerializerSettings.ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() };
+//    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+//});
 
 DependenciesInjector.Register(builder.Services);
 

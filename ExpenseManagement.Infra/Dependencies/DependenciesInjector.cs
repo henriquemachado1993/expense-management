@@ -1,5 +1,5 @@
-﻿using ExpenseManagement.Domain.Interfaces.Data;
-using ExpenseManagement.Domain.Interfaces.Services;
+﻿using ExpenseManagement.Shared.Interfaces.Data;
+using ExpenseManagement.Shared.Interfaces.Services;
 using ExpenseManagement.Infra.Repositories;
 using ExpenseManagement.Services.Services;
 using Microsoft.AspNetCore.Http;

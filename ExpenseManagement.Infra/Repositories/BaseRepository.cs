@@ -1,6 +1,6 @@
-﻿using ExpenseManagement.Domain.Interfaces.Data;
-using ExpenseManagement.Domain.Entities;
-using ExpenseManagement.Domain.ValueObjects;
+﻿using ExpenseManagement.Shared.Interfaces.Data;
+using ExpenseManagement.Shared.Entities;
+using ExpenseManagement.Shared.ValueObjects;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore;
 

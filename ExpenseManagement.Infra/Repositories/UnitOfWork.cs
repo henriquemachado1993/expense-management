@@ -1,5 +1,5 @@
-﻿using ExpenseManagement.Domain.Entities;
-using ExpenseManagement.Domain.Interfaces.Data;
+﻿using ExpenseManagement.Shared.Entities;
+using ExpenseManagement.Shared.Interfaces.Data;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections;

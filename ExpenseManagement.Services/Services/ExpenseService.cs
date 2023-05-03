@@ -1,7 +1,7 @@
-﻿using ExpenseManagement.Domain.Entities;
-using ExpenseManagement.Domain.Interfaces.Data;
-using ExpenseManagement.Domain.Interfaces.Services;
-using ExpenseManagement.Domain.ValueObjects;
+﻿using ExpenseManagement.Shared.Entities;
+using ExpenseManagement.Shared.Interfaces.Data;
+using ExpenseManagement.Shared.Interfaces.Services;
+using ExpenseManagement.Shared.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;

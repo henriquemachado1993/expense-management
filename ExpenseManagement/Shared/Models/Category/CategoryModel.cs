@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace ExpenseManagement.Shared.Models.Category
 {
-    public class CategoryModel : BaseModel
+    public class CategoryModel
     {
+        public string Id { get; set; }
         public string Title { get; set; }
-        public string Description { get; set; }
-        public string PathImage { get; set; }
+        public string? Description { get; set; }
+        public string? PathImage { get; set; }
     }
 }

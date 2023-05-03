@@ -1,4 +1,4 @@
-﻿using ExpenseManagement.Domain.Entities;
+﻿using ExpenseManagement.Shared.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,7 +13,6 @@ namespace ThayCompany.Infra.Data.Mappings
             builder.Property(c => c.Id).IsRequired().HasColumnName("Id");
 
             // Audit
-            builder.Property(x => x.UserName).IsRequired();
             builder.Property(x => x.CreatedAt).ValueGeneratedOnAdd().IsRequired();
             builder.Property(x => x.LastModifiedAt).ValueGeneratedOnUpdate();
         }
