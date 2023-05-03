@@ -50,7 +50,7 @@ else
                     <td>@category.Description</td>
                     <td>
                         <NavLink class="btn btn-primary" href="categories/update">Alterar</NavLink>
-                        <button class="btn btn-primary" @onclick="()=>Delete(category.Id)">Excluir</button>
+                        <button class="btn btn-primary"  @onclick="() => OpenDialog(category.Id)">Excluir</button>
                     </td>
                 </tr>
             }
@@ -58,7 +58,20 @@ else
     </table>
 }
 
+@if (DialogIsOpen)
+{
+    <Dialog Title="Deletar categoria"
+        Message="Tem certeza que deseja excluir este registro?"
+        OnClose="@OnDialogClose"
+        Type="Dialog.Category.Delete">
+    </Dialog>
+}
+
 @code {
+
+    private int IdCategory;
+    private bool DialogIsOpen = false;
+
     private BusinessResult<List<Category>>? categories;
     public List<MessageResult> Alerts = new();
 
@@ -106,7 +119,7 @@ else
                 {
                     // remove o item da lista
                     categories.Data = categories.Data.Where(x => x.Id != id).ToList();
-                    AlertHelper.AddSuccess(Alerts, "Deletado com sucesso.");
+                    AlertHelper.AddSuccess(Alerts, "Registro deletado com sucesso.");
                 }
             }
         }
@@ -114,5 +127,20 @@ else
         {
             AlertHelper.AddError(Alerts, ex.Message);
         }
+    }
+
+    private void OpenDialog(int id)
+    {
+        DialogIsOpen = true;
+        IdCategory = id;
+    }
+
+    private async Task OnDialogClose(bool isOk)
+    {
+        if (isOk && IdCategory > 0)
+        {
+            await Delete(IdCategory);
+        }
+        DialogIsOpen = false;
     }
 }
