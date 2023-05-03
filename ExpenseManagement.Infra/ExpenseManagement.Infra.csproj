@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ExpenseManagement.Domain\ExpenseManagement.Domain.csproj" />
+    <ProjectReference Include="..\ExpenseManagement.Services\ExpenseManagement.Services.csproj" />
   </ItemGroup>
 
 </Project>

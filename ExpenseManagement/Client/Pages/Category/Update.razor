@@ -1,0 +1,37 @@
+﻿@page "/categories/update"
+@using ExpenseManagement.Shared.Models.Category
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using ExpenseManagement.Shared
+@attribute [Authorize]
+@inject HttpClient Http
+
+
+<PageTitle>Alterar</PageTitle>
+
+<h1>Alterar</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+
+
+@code {
+    private CategoryModel[]? categories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            categories = await Http.GetFromJsonAsync<CategoryModel[]>("Category");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+    private void Register()
+    {
+        
+    }
+}

@@ -1,0 +1,66 @@
+﻿@page "/categories"
+@using ExpenseManagement.Shared.Models.Category
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using ExpenseManagement.Shared
+@attribute [Authorize]
+@inject HttpClient Http
+
+<PageTitle>Categorias</PageTitle>
+
+<h1>Categorias</h1>
+
+@if (categories == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <NavLink class="btn btn-primary" href="categories/add">Novo</NavLink><br />
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Titulo</th>
+                <th>Descrição</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var category in categories)
+            {
+                <tr>
+                    <td>@category.Id</td>
+                    <td>@category.Title</td>
+                    <td>@category.Description</td>
+                    <td>
+                        <NavLink class="btn btn-primary" href="categories/update">Alterar</NavLink>
+                        <button class="btn btn-primary" @onclick="()=>Remove(category.Id)">Excluir</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private CategoryModel[]? categories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            categories = await Http.GetFromJsonAsync<CategoryModel[]>("Category");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+    private void Remove(int id)
+    {
+        
+    }
+}
