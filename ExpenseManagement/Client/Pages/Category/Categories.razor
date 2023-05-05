@@ -36,7 +36,7 @@ else
         <thead>
             <tr>
                 <th>#</th>
-                <th>Titulo</th>
+                <th>Título</th>
                 <th>Descrição</th>
                 <th>Ação</th>
             </tr>
@@ -49,8 +49,8 @@ else
                     <td>@category.Title</td>
                     <td>@category.Description</td>
                     <td>
-                        <NavLink class="btn btn-primary" href="categories/update">Alterar</NavLink>
-                        <button class="btn btn-primary"  @onclick="() => OpenDialog(category.Id)">Excluir</button>
+                        <NavLink class="btn btn-primary" href="@($"categories/update/{category.Id}")">Alterar</NavLink>
+                        <button class="btn btn-primary" @onclick="() => OpenDialogDelete(category.Id)">Excluir</button>
                     </td>
                 </tr>
             }
@@ -129,7 +129,7 @@ else
         }
     }
 
-    private void OpenDialog(int id)
+    private void OpenDialogDelete(int id)
     {
         DialogIsOpen = true;
         IdCategory = id;

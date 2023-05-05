@@ -28,10 +28,24 @@ namespace ExpenseManagement.Server.Controllers
             return service.GetFiltered();
         }
 
+        [HttpGet("{id}")]
+        public BusinessResult<Category> Get(int id)
+        {
+            var service = _serviceProvider.GetRequiredService<ICategoryService>();
+            return service.GetById(id);
+        }
+
         [HttpPost]
         public BusinessResult<Category> Post(Category category)
         {
             var service = _serviceProvider.GetRequiredService<ICategoryService>();
+
+            // se for alteração
+            if (category.Id > 0)
+            {
+                return service.Update(category);
+            }
+
             return service.Add(category);
         }
 

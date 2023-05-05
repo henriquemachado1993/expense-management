@@ -1,4 +1,4 @@
-﻿@page "/expenses"
+﻿@page "/bank-accounts"
 @using ExpenseManagement.Shared.Entities
 @using ExpenseManagement.Shared.Enuns
 @using ExpenseManagement.Shared.Extensions
@@ -10,9 +10,9 @@
 @attribute [Authorize]
 @inject HttpClient Http
 
-<PageTitle>Minhas Despesas</PageTitle>
+<PageTitle>Minhas contas</PageTitle>
 
-<h1>Minhas Despesas</h1>
+<h1>Minhas contas</h1>
 
 @if (Alerts.Any())
 {
@@ -25,46 +25,37 @@
     }
 }
 
-@if (ResponseExpenses == null)
+@if (bankAccounts == null)
 {
     <p><em>Carregando...</em></p>
 }
 else
 {
-    <NavLink class="btn btn-primary" href="expenses/add">Novo</NavLink>
+    <NavLink class="btn btn-primary" href="bank-accounts/add">Novo</NavLink>
     <br />
 
     <table class="table">
         <thead>
             <tr>
-                <th>Descrição</th>
-                <th>Valor R$</th>
-                <th>Pago</th>
-                <th>Data</th>
-                <th>Categoria</th>
+                <th>#</th>
+                <th>Título</th>
+                <th>Tipo</th>
+                <th>Total R$</th>
+                <th>Atualizado em</th>
                 <th>Ação</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in ResponseExpenses.Data)
+            @foreach (var item in bankAccounts.Data)
             {
                 <tr>
-                    <td>@item.Description</td>
-                    <td>@CurrencyHelper.FormatCurrency(item.Amount, "BRL")</td>
+                    <td>@item.Id</td>
+                    <td>@item.Title</td>
+                    <td>@(((TypeBankAccount)item.Type).GetDisplayName())</td>
+                    <td>@CurrencyHelper.FormatCurrency(item.AccountValue, "BRL")</td>
+                    <td>@(item.LastModifiedAt == null ? item.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss") : item.LastModifiedAt?.ToString("dd/MM/yyyy HH:mm:ss"))</td>
                     <td>
-                        @if (item.IsPaid == 1)
-                        {
-                            <span class="badge bg-success">Sim</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-danger">Não</span>
-                        }
-                    </td>
-                    <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                    <td>@item.Category.Title</td>
-                    <td>
-                        <NavLink class="btn btn-primary" href="@($"expenses/update/{item.Id}")">Alterar</NavLink>
+                        <NavLink class="btn btn-primary" href="@($"bank-accounts/update/{item.Id}")">Alterar</NavLink>
                         <button class="btn btn-primary" @onclick="() => OpenDialogDelete(item.Id)">Excluir</button>
                     </td>
                 </tr>
@@ -84,20 +75,20 @@ else
 
 @code {
 
-    private int IdExpense;
+    private int IdAccount;
     private bool DialogIsOpen = false;
 
-    private BusinessResult<List<Expense>>? ResponseExpenses;
+    private BusinessResult<List<BankAccounts>>? bankAccounts;
     public List<MessageResult> Alerts = new();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            ResponseExpenses = await Http.GetFromJsonAsync<BusinessResult<List<Expense>>>("Expense");
-            if (ResponseExpenses != null && !ResponseExpenses.IsValid)
+            bankAccounts = await Http.GetFromJsonAsync<BusinessResult<List<BankAccounts>>>("BankAccounts");
+            if (bankAccounts != null && !bankAccounts.IsValid)
             {
-                foreach (var message in ResponseExpenses.Messages)
+                foreach (var message in bankAccounts.Messages)
                     AlertHelper.AddError(Alerts, message.Message);
             }
         }
@@ -115,7 +106,7 @@ else
     {
         try
         {
-            var httpResponse = await Http.DeleteAsync($"Expense/{id}");
+            var httpResponse = await Http.DeleteAsync($"BankAccounts/{id}");
 
             if (!httpResponse.IsSuccessStatusCode)
             {
@@ -133,7 +124,7 @@ else
                 else
                 {
                     // remove o item da lista
-                    ResponseExpenses.Data = ResponseExpenses.Data.Where(x => x.Id != id).ToList();
+                    bankAccounts.Data = bankAccounts.Data.Where(x => x.Id != id).ToList();
                     AlertHelper.AddSuccess(Alerts, "Registro deletado com sucesso.");
                 }
             }
@@ -147,14 +138,14 @@ else
     private void OpenDialogDelete(int id)
     {
         DialogIsOpen = true;
-        IdExpense = id;
+        IdAccount = id;
     }
 
     private async Task OnDialogClose(bool isOk)
     {
-        if (isOk && IdExpense > 0)
+        if (isOk && IdAccount > 0)
         {
-            await Delete(IdExpense);
+            await Delete(IdAccount);
         }
         DialogIsOpen = false;
     }

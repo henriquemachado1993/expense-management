@@ -1,19 +1,21 @@
-﻿@page "/categories/add"
+﻿@page "/bank-accounts/add"
 @using ExpenseManagement.Shared.Entities
 @using ExpenseManagement.Shared.Enums
-@using ExpenseManagement.Shared.Models.Category
+@using ExpenseManagement.Shared.Enuns
+@using ExpenseManagement.Shared.Extensions
 @using ExpenseManagement.Shared.ValueObjects
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using ExpenseManagement.Shared
 @using System.Net
+
 @attribute [Authorize]
 @inject HttpClient Http
 
-<PageTitle>Adicionar</PageTitle>
+<PageTitle>Adicionar conta</PageTitle>
 
-<EditForm Model="@Category" OnValidSubmit="@HandleValidSubmit">
-    <h3>Adicionar Categoria</h3>
+<EditForm Model="@Account" OnValidSubmit="@HandleValidSubmit">
+    <h3>Adicionar Conta</h3>
     <hr />
 
     <DataAnnotationsValidator />
@@ -34,30 +36,49 @@
             Título
         </label>
         <InputText id="title" class="form-control" placeholder="Título"
-                   @bind-Value="Category.Title" />
-        <ValidationMessage For="() => Category.Title" />
+                   @bind-Value="Account.Title" />
+        <ValidationMessage For="() => Account.Title" />
+    </div>
+    <div class="form-group">
+        <label for="title" class="form-label">
+            Tipo de conta
+        </label>
+        <InputSelect class="form-control" @bind-Value="@Account.Type">
+            <option value="0" disabled selected>Selecione o tipo</option>
+            @foreach (var type in Enum.GetNames(typeof(TypeBankAccount)))
+            {
+                <option value="@((int)EnumExtension.GetEnumValue<TypeBankAccount>(type))">
+                    @(EnumExtension.GetEnumValue<TypeBankAccount>(type).GetDisplayName())
+                </option>
+            }
+        </InputSelect>
+
+        <ValidationMessage For="() => Account.Type" />
     </div>
     <div class="form-group">
         <label for="description" class="form-label">
-            Descrição
+            Valor
         </label>
-        <InputText id="description" class="form-control" placeholder="Descrição"
-                   @bind-Value="Category.Description" />
+        <InputNumber id="description" class="form-control" placeholder="Valor total na conta"
+                     @bind-Value="Account.AccountValue" />
+        <ValidationMessage For="() => Account.AccountValue" />
     </div>
     <br />
+
     <button type="submit" class="btn btn-primary">Salvar</button>
-    <NavLink class="btn btn-primary" href="@($"categories")">Listagem</NavLink>
+    <NavLink class="btn btn-primary" href="@($"bank-accounts")">Listagem</NavLink>
+
 </EditForm>
 
 @code {
-    private Category Category = new();
+    private BankAccounts Account = new();
     public List<MessageResult> Alerts = new();
 
     private async Task HandleValidSubmit(EditContext editContext)
     {
         try
         {
-            var httpResponse = await Http.PostAsJsonAsync<Category>("Category", (Category)editContext.Model);
+            var httpResponse = await Http.PostAsJsonAsync<BankAccounts>("BankAccounts", (BankAccounts)editContext.Model);
 
             if (!httpResponse.IsSuccessStatusCode)
             {
@@ -66,7 +87,7 @@
             }
             else
             {
-                var response = await httpResponse.Content.ReadFromJsonAsync<BusinessResult<Category>>();
+                var response = await httpResponse.Content.ReadFromJsonAsync<BusinessResult<BankAccounts>>();
                 if (response != null && !response.IsValid)
                 {
                     foreach (var message in response.Messages)

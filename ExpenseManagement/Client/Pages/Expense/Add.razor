@@ -1,0 +1,169 @@
+﻿@page "/expenses/add"
+@using ExpenseManagement.Shared.Entities
+@using ExpenseManagement.Shared.Enuns
+@using ExpenseManagement.Shared.Extensions
+@using ExpenseManagement.Shared.Helpers
+@using ExpenseManagement.Shared.ValueObjects
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using ExpenseManagement.Shared
+@attribute [Authorize]
+@inject HttpClient Http
+
+<PageTitle>Adicionar despesas</PageTitle>
+
+<EditForm Model="@Expense" OnValidSubmit="@HandleValidSubmit">
+    <h3>Adicionar Despesa</h3>
+    <hr />
+
+    <DataAnnotationsValidator />
+
+    @if (Alerts.Any())
+    {
+        @foreach (var alert in Alerts)
+        {
+            <div class="alert alert-@alert.TypeCustom alert-dismissible fade show" role="alert">
+                @alert.Message
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+    }
+
+    <div class="form-group">
+        <label for="title" class="form-label">
+            Descrição
+        </label>
+        <InputText id="Description" class="form-control" placeholder="Descrição da despesa"
+                   @bind-Value="Expense.Description" />
+        <ValidationMessage For="() => Expense.Description" />
+    </div>
+
+    <div class="form-group">
+        <label for="description" class="form-label">
+            Valor
+        </label>
+        <InputNumber id="Amount" class="form-control" placeholder="Valor total da despesa"
+                     @bind-Value="Expense.Amount" />
+        <ValidationMessage For="() => Expense.Amount" />
+    </div>
+
+    <div class="form-group">
+        <label for="title" class="form-label">
+            Pago?
+        </label>
+        <br />
+        <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+            <InputRadioGroup class="form-control" @bind-Value="Expense.IsPaid">
+                <InputRadio Value="1" class="btn-check " id="btncheckYes" /> <label class="btn btn-outline-primary" for="btncheckYes">Sim</label>
+                <InputRadio Value="0" class="btn-check" id="btncheckNo" checked="checked" /> <label class="btn btn-outline-primary" for="btncheckNo">Não</label>
+            </InputRadioGroup>
+        </div>
+        <ValidationMessage For="() => Expense.IsPaid" />
+    </div>
+
+    <hr />
+
+    <div class="form-group">
+        <label for="CategoryId" class="form-label">
+            Categorias
+        </label>
+
+        <div class="container text-center">
+            <div class="row row-cols-auto">
+                @if (ItensCategory != null && ItensCategory.Any())
+                {
+                    @foreach (var item in ItensCategory)
+                    {
+                        <div id="@item.Id" class="col @(item.Selected ? "item-selected" : "") box-item" @onclick="() => SetCategory(item.Id)">
+                            @item.Value
+                            @if (item.Selected)
+                            {
+                                <span class="oi oi-check" aria-hidden="true" style="margin-left: 3px;"></span>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+        <InputNumber hidden @bind-Value="Expense.CategoryId" />
+        <ValidationMessage For="() => Expense.CategoryId" />
+    </div>
+
+    <br />
+
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <NavLink class="btn btn-primary" href="@($"expenses")">Listagem</NavLink>
+    <NavLink class="btn btn-primary" href="@($"categories/add")">Adicionar categoria</NavLink>
+
+</EditForm>
+
+@code {
+
+    private Expense Expense = new();
+    private BusinessResult<List<Category>>? Categories = new();
+    private List<ItemControl> ItensCategory = new();
+    public List<MessageResult> Alerts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Categories = await Http.GetFromJsonAsync<BusinessResult<List<Category>>>("Category");
+
+            if (Categories != null && !Categories.IsValid)
+            {
+                foreach (var message in Categories.Messages)
+                    AlertHelper.AddError(Alerts, message.Message);
+                return;
+            }
+
+            if (Categories != null && Categories.Data != null && Categories.Data.Any())
+            {
+                ItensCategory = ListItemControlHelper.GetListItensControl(Categories.Data.ToDictionary(x => x.Id.ToString(), x => x.Title));
+            }
+        }
+        catch (Exception ex)
+        {
+            AlertHelper.AddError(Alerts, ex.Message);
+        }
+    }
+
+    private async Task HandleValidSubmit(EditContext editContext)
+    {
+        try
+        {
+            var httpResponse = await Http.PostAsJsonAsync<Expense>("Expense", (Expense)editContext.Model);
+
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException(
+                    $"Houve um problema. Status Code: {httpResponse.StatusCode}");
+            }
+            else
+            {
+                var response = await httpResponse.Content.ReadFromJsonAsync<BusinessResult<Expense>>();
+                if (response != null && !response.IsValid)
+                {
+                    foreach (var message in response.Messages)
+                        Alerts.Add(new MessageResult() { Message = message.Message, TypeCustom = "danger" });
+                }
+                else
+                {
+                    Alerts.Add(new MessageResult() { Message = "Cadastrado com sucesso.", TypeCustom = "success" });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Alerts.Add(new MessageResult() { Message = ex.Message, TypeCustom = "danger" });
+        }
+    }
+
+    private void SetCategory(string categoryId)
+    {
+        int.TryParse(categoryId, out int idCat);
+        Expense.CategoryId = idCat;
+
+        ListItemControlHelper.SetItemSelected(ItensCategory, categoryId);
+    }
+}

@@ -1,0 +1,126 @@
+﻿@page "/categories/update/{Id:int}"
+@using ExpenseManagement.Shared.Entities
+@using ExpenseManagement.Shared.Enums
+@using ExpenseManagement.Shared.Helpers
+@using ExpenseManagement.Shared.Models.Category
+@using ExpenseManagement.Shared.ValueObjects
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using ExpenseManagement.Shared
+@using System.Net
+@attribute [Authorize]
+@inject HttpClient Http
+
+<PageTitle>Alterar</PageTitle>
+
+@if (Category == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <EditForm Model="@Category" OnValidSubmit="@HandleValidSubmit">
+        <h3>Alterar Categoria</h3>
+        <hr />
+
+        <DataAnnotationsValidator />
+
+        @if (Alerts.Any())
+        {
+            @foreach (var alert in Alerts)
+            {
+                <div class="alert alert-@alert.TypeCustom alert-dismissible fade show" role="alert">
+                    @alert.Message
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+        }
+
+        <div class="form-group">
+            <label for="title" class="form-label">
+                Título
+            </label>
+            <InputText id="title" class="form-control" placeholder="Título"
+                   @bind-Value="Category.Title" />
+            <ValidationMessage For="() => Category.Title" />
+        </div>
+        <div class="form-group">
+            <label for="description" class="form-label">
+                Descrição
+            </label>
+            <InputText id="description" class="form-control" placeholder="Descrição"
+                   @bind-Value="Category.Description" />
+        </div>
+        <br />
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <NavLink class="btn btn-primary" href="@($"categories")">Listagem</NavLink>
+
+    </EditForm>
+}
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Category Category = new();
+    public List<MessageResult> Alerts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (Id <= 0)
+                return;
+
+            var reponse = await Http.GetFromJsonAsync<BusinessResult<Category>>($"Category/{Id}");
+            if (reponse != null && !reponse.IsValid)
+            {
+                foreach (var message in reponse.Messages)
+                    AlertHelper.AddError(Alerts, message.Message);
+
+                return;
+            }
+
+            if (reponse != null)
+                Category = reponse.Data;
+
+        }
+        catch (Exception ex)
+        {
+            AlertHelper.AddError(Alerts, ex.Message);
+        }
+    }
+
+    private async Task HandleValidSubmit(EditContext editContext)
+    {
+        try
+        {
+            var httpResponse = await Http.PostAsJsonAsync<Category>("Category", (Category)editContext.Model);
+
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException(
+                    $"Houve um problema. Status Code: {httpResponse.StatusCode}");
+            }
+            else
+            {
+                var response = await httpResponse.Content.ReadFromJsonAsync<BusinessResult<Category>>();
+                if (response != null && !response.IsValid)
+                {
+                    foreach (var message in response.Messages)
+                        Alerts.Add(new MessageResult() { Message = message.Message, TypeCustom = "danger" });
+                }
+                else
+                {
+                    Alerts.Add(new MessageResult() { Message = "Alterado com sucesso.", TypeCustom = "success" });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Alerts.Add(new MessageResult() { Message = ex.Message, TypeCustom = "danger" });
+        }
+    }
+}
