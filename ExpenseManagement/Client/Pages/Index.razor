@@ -1,9 +1,66 @@
 ﻿@page "/"
+@using ExpenseManagement.Shared.Entities
+@using ExpenseManagement.Shared.Helpers
+@using ExpenseManagement.Shared.ValueObjects
+@using static System.Net.WebRequestMethods
 
-<PageTitle>Index</PageTitle>
+@inject HttpClient Http
 
-<h1>Hello, world!</h1>
+<PageTitle>Dashboard</PageTitle>
 
-Welcome to your new app.
+@if (ResponseExpense == null || ResponseBankAccounts == null)
+{
+    <p><em>Carregando...</em></p>
+}
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<DashboardInfo ResponseExpense="@ResponseExpense" ResponseBankAccounts="@ResponseBankAccounts"></DashboardInfo>
+
+@code {
+    private List<MessageResult> Alerts = new();
+    private BusinessResult<List<ExpenseManagement.Shared.Entities.Expense>>? ResponseExpense = new();
+    private BusinessResult<List<ExpenseManagement.Shared.Entities.BankAccounts>>? ResponseBankAccounts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadExpense();
+        await LoadBankaccounts();
+    }
+
+    private async Task LoadExpense()
+    {
+        try
+        {
+            ResponseExpense = await Http.GetFromJsonAsync<BusinessResult<List<ExpenseManagement.Shared.Entities.Expense>>>($"Expense");
+            if (ResponseExpense != null && !ResponseExpense.IsValid)
+            {
+                foreach (var message in ResponseExpense.Messages)
+                    AlertHelper.AddError(Alerts, message.Message);
+
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            AlertHelper.AddError(Alerts, ex.Message);
+        }
+    }
+
+    private async Task LoadBankaccounts()
+    {
+        try
+        {
+            ResponseBankAccounts = await Http.GetFromJsonAsync<BusinessResult<List<ExpenseManagement.Shared.Entities.BankAccounts>>>($"BankAccounts");
+            if (ResponseBankAccounts != null && !ResponseBankAccounts.IsValid)
+            {
+                foreach (var message in ResponseBankAccounts.Messages)
+                    AlertHelper.AddError(Alerts, message.Message);
+
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            AlertHelper.AddError(Alerts, ex.Message);
+        }
+    }
+}

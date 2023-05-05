@@ -75,3 +75,14 @@ a, .btn-link {
     padding: 10px;
     margin: 5px;
 }
+
+.icon-warning {
+    border-radius: 5px;
+    border: 1px solid #ebdf00;
+    padding: 15px;
+    color: #686300;
+    background-color: #fff5348c;
+    text-align: center;
+    float: left;
+    margin-right: 20px;
+}

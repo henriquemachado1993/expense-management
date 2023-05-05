@@ -1,0 +1,72 @@
+﻿@using ExpenseManagement.Shared.Entities
+@using ExpenseManagement.Shared.Helpers
+@using ExpenseManagement.Shared.ValueObjects
+@using static System.Net.WebRequestMethods
+
+
+@if (ResponseExpense != null && ResponseExpense.Data != null)
+{
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title">Despesas a pagar</h5>
+        </div>
+        <div class="card-body">
+            @if (!ResponseExpense.Data.Any())
+            {
+                <p class="card-text">Não há despesas a serem pagas por você.</p>
+            }
+            else
+            {
+                <p class="card-text">Você tem @ResponseExpense.Data.Where(p => p.IsPaid != 1).Count() contas a pagar no total de <strong>@CurrencyHelper.FormatCurrency(ResponseExpense.Data.Where(p => p.IsPaid != 1).Select(x => x.Amount).Sum(), "BRL")</strong></p>
+            }
+            <a href="@($"expenses")" class="btn btn-primary">Ver despesas</a>
+        </div>
+    </div>
+    <br />
+}
+
+@if (ResponseBankAccounts != null && ResponseBankAccounts.Data != null)
+{
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title">Minhas contas</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+
+            @if (!ResponseBankAccounts.Data.Any())
+            {
+                <li class="list-group-item">
+                    <p class="card-text">Não há contas bancárias cadastradas em seu nome.</p>
+                </li>
+            }
+            else
+            {
+                <li class="list-group-item">
+                    <div style="border-left: 6px solid #008304 !important;padding-left: 10px;">
+                        <h5 class="mb-1">Saldo geral</h5>
+                        <small class="text-body-secondary">@CurrencyHelper.FormatCurrency(ResponseBankAccounts.Data.Select(x => x.AccountValue).Sum(), "BRL")</small>
+                    </div>
+                </li>
+
+                @foreach (var account in ResponseBankAccounts.Data)
+                {
+                    <li class="list-group-item">
+                        <h5 class="mb-1">@account.Title</h5>
+                        <small class="text-body-secondary">@CurrencyHelper.FormatCurrency(account.AccountValue, "BRL")</small>
+                    </li>
+                }
+            }
+
+        </ul>
+        <div class="card-body">
+            <a href="@($"bank-accounts")" class="btn btn-primary">Gerenciar contas</a>
+        </div>
+    </div>
+}
+
+
+@code {
+    private List<MessageResult> Alerts = new();
+    [Parameter] public BusinessResult<List<Expense>>? ResponseExpense { get; set; }
+    [Parameter] public BusinessResult<List<BankAccounts>>? ResponseBankAccounts { get; set; }
+}
