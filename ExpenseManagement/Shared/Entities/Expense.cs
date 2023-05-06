@@ -16,6 +16,9 @@ namespace ExpenseManagement.Shared.Entities
         [Required(ErrorMessage = "Este campo é obrigatório.")]
         public int IsPaid { get; set; }
 
+        [Required(ErrorMessage = "Este campo é obrigatório.")]
+        public DateTime ExpenseDate { get; set; }
+
         // Relationships
         public string UserId { get; set; }
         public User User { get; set; }

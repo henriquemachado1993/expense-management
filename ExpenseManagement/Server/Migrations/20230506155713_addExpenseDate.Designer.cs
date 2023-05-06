@@ -3,6 +3,7 @@ using System;
 using ExpenseManagement.Infra.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExpenseManagement.Server.Migrations
 {
     [DbContext(typeof(ExpenseManagementContext))]
-    partial class ExpenseManagementContextModelSnapshot : ModelSnapshot
+    [Migration("20230506155713_addExpenseDate")]
+    partial class addExpenseDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

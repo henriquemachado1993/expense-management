@@ -57,5 +57,12 @@ namespace ExpenseManagement.Server.Controllers
             var service = _serviceProvider.GetRequiredService<IExpenseService>();
             return service.Delete(id);
         }
+
+        [HttpPut("confirmpayment")]
+        public BusinessResult<Expense> ConfirmPayment(BaseEntity request)
+        {
+            var service = _serviceProvider.GetRequiredService<IExpenseService>();
+            return service.ConfirmPayment(request.Id);
+        }
     }
 }
