@@ -1,4 +1,6 @@
 ﻿@using ExpenseManagement.Shared.Entities
+@using ExpenseManagement.Shared.Enuns
+@using ExpenseManagement.Shared.Extensions
 @using ExpenseManagement.Shared.Helpers
 @using ExpenseManagement.Shared.ValueObjects
 @using static System.Net.WebRequestMethods
@@ -52,7 +54,8 @@
                 {
                     <li class="list-group-item">
                         <h5 class="mb-1">@account.Title</h5>
-                        <small class="text-body-secondary">@CurrencyHelper.FormatCurrency(account.AccountValue, "BRL")</small>
+                        <small class="text-body-secondary">@(((TypeBankAccount)account.Type).GetDisplayName())</small>
+                        <small style="float: right;" class="text-body-secondary">@CurrencyHelper.FormatCurrency(account.AccountValue, "BRL")</small>
                     </li>
                 }
             }

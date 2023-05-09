@@ -1,0 +1,46 @@
+﻿@page "/statistics/reports"
+
+<h3>Reports</h3>
+
+<!--Despesas por mes -->
+<div Class="rz-p-0 rz-p-md-12">
+    <RadzenChart>
+        <RadzenValueAxis>
+            <RadzenAxisTitle Text="Revenue" />
+        </RadzenValueAxis>
+        <RadzenCategoryAxis>
+            <RadzenAxisTitle Text="Quarter" />
+        </RadzenCategoryAxis>
+        <RadzenColumnSeries Data="@revenue" CategoryProperty="Quarter" ValueProperty="Revenue" />
+    </RadzenChart>
+</div>
+
+<!--Despesas por categoria -->
+<div Class="rz-p-0 rz-p-md-12">
+    <RadzenChart>
+        <RadzenValueAxis>
+            <RadzenAxisTitle Text="Revenue" />
+        </RadzenValueAxis>
+        <RadzenCategoryAxis>
+            <RadzenAxisTitle Text="Quarter" />
+        </RadzenCategoryAxis>
+        <RadzenColumnSeries Data="@revenue" CategoryProperty="Quarter" ValueProperty="Revenue" />
+    </RadzenChart>
+</div>
+
+
+@code {
+    class DataItem
+    {
+        public string Quarter { get; set; }
+        public double Revenue { get; set; }
+    }
+
+    DataItem[] revenue = new DataItem[]
+        {
+      new DataItem { Quarter = "Q1", Revenue = 234000 },
+      new DataItem { Quarter = "Q2", Revenue = 284000 },
+      new DataItem { Quarter = "Q3", Revenue = 274000 },
+      new DataItem { Quarter = "Q4", Revenue = 294000 }
+        };
+}

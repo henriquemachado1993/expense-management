@@ -66,11 +66,11 @@ else
 
 @if (DialogIsOpen)
 {
-    <Dialog Title="Deletar conta"
+    <DialogCustom Title="Deletar conta"
         Message="Tem certeza que deseja excluir este registro?"
         OnClose="@OnDialogClose"
-        Type="Dialog.Category.Delete">
-    </Dialog>
+        Type="DialogCustom.Category.Delete">
+    </DialogCustom>
 }
 
 @code {

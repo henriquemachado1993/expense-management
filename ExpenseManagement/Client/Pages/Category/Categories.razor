@@ -60,11 +60,11 @@ else
 
 @if (DialogIsOpen)
 {
-    <Dialog Title="Deletar categoria"
+    <DialogCustom Title="Deletar categoria"
         Message="Tem certeza que deseja excluir este registro?"
         OnClose="@OnDialogClose"
-        Type="Dialog.Category.Delete">
-    </Dialog>
+        Type="DialogCustom.Category.Delete">
+    </DialogCustom>
 }
 
 @code {
