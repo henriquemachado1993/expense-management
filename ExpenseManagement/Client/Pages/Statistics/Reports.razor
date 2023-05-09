@@ -7,11 +7,13 @@
 @attribute [Authorize]
 @inject HttpClient Http
 
-<h3>Reports</h3>
+<h3>Gráficos estatisticos (@DateTime.Now.Year)</h3>
+<hr />
 
 <AlertCustom Alerts=@Alerts></AlertCustom>
 
 <div class="container">
+    <h5>Despesas por mês</h5>
     <!--Despesas por mes -->
     <div Class="rz-p-0 rz-p-md-12">
         <RadzenChart>
@@ -19,12 +21,13 @@
                 <RadzenAxisTitle Text="Valor" />
             </RadzenValueAxis>
             <RadzenCategoryAxis>
-                <RadzenAxisTitle Text="Mes" />
+                <RadzenAxisTitle Text="Mês" />
             </RadzenCategoryAxis>
-            <RadzenColumnSeries Data="@ExpensesByMonth.ToArray()" CategoryProperty="Key" ValueProperty="Value" />
+            <RadzenColumnSeries Data="@ExpensesByMonth.ToArray()" CategoryProperty="Key" ValueProperty="Value" Title="Mês" />
         </RadzenChart>
     </div>
 
+    <h5>Despesas por categoria</h5>
     <!--Despesas por categoria -->
     <div Class="rz-p-0 rz-p-md-12">
         <RadzenChart>
@@ -34,23 +37,24 @@
             <RadzenCategoryAxis>
                 <RadzenAxisTitle Text="Categoria" />
             </RadzenCategoryAxis>
-            <RadzenColumnSeries Data="@ExpensesByCategory.ToArray()" CategoryProperty="Key" ValueProperty="Value" />
+            <RadzenPieSeries Data="@ExpensesByCategory.ToArray()" CategoryProperty="Key" ValueProperty="Value" Title="Categoria" />
         </RadzenChart>
     </div>
 
 </div>
 
-
-
-
-
 @code {
+    public List<MessageResult> Alerts = new();
 
     private List<DataItem<decimal>> ExpensesByMonth = new();
     private List<DataItem<decimal>> ExpensesByCategory = new();
-    public List<MessageResult> Alerts = new();
-
+    
     protected override async Task OnInitializedAsync()
+    {
+        await LoadChats();
+    }
+
+    private async Task LoadChats()
     {
         try
         {
@@ -62,15 +66,18 @@
                 return;
             }
 
-            var groupedExpensesByMonth = ResponseExpenses.Data.GroupBy(x => x.ExpenseDate.ToString("MMM"));
-            var groupedExpensesByCategory = ResponseExpenses.Data.GroupBy(x => x.Category.Description);
+            if (ResponseExpenses != null && ResponseExpenses.Data != null && ResponseExpenses.Data.Any())
+            {
+                var expensesByYear = ResponseExpenses.Data.Where(x => x.ExpenseDate.Year == DateTime.Now.Year);
+                var groupedExpensesByMonth = expensesByYear.GroupBy(x => x.ExpenseDate.ToString("MMM"));
+                var groupedExpensesByCategory = expensesByYear.GroupBy(x => x.Category.Description);
 
-            foreach (var group in groupedExpensesByMonth)
-                ExpensesByMonth.Add(new DataItem<decimal>() { Key = group.Key, Value = group.Sum(x => x.Amount) });
+                foreach (var group in groupedExpensesByMonth)
+                    ExpensesByMonth.Add(new DataItem<decimal>() { Key = group.Key, Value = group.Sum(x => x.Amount) });
 
-            foreach (var group in groupedExpensesByCategory)
-                ExpensesByCategory.Add(new DataItem<decimal>() { Key = group.Key, Value = group.Sum(x => x.Amount) });
-
+                foreach (var group in groupedExpensesByCategory)
+                    ExpensesByCategory.Add(new DataItem<decimal>() { Key = group.Key, Value = group.Sum(x => x.Amount) });
+            }
         }
         catch (Exception ex)
         {

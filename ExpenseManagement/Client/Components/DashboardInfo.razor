@@ -29,6 +29,9 @@
 
 @if (ResponseBankAccounts != null && ResponseBankAccounts.Data != null)
 {
+
+    var discountBanlance = GetDiscountBalance(ResponseBankAccounts.Data.Select(x => x.AccountValue).Sum(), ResponseExpense?.Data?.Where(p => p.IsPaid != 1)?.Select(x => x.Amount)?.Sum() ?? 0);
+
     <div class="card">
         <div class="card-header">
             <h5 class="card-title">Minhas contas</h5>
@@ -44,10 +47,27 @@
             else
             {
                 <li class="list-group-item">
-                    <div style="border-left: 6px solid #008304 !important;padding-left: 10px;">
-                        <h5 class="mb-1">Saldo geral</h5>
-                        <small class="text-body-secondary">@CurrencyHelper.FormatCurrency(ResponseBankAccounts.Data.Select(x => x.AccountValue).Sum(), "BRL")</small>
+                    <div class="row">
+                        <div class="col">
+                            <div style="border-left: 6px solid #008304 !important;padding-left: 10px;">
+                                <h5 class="mb-1">Saldo geral</h5>
+                                <small class="text-body-secondary">@CurrencyHelper.FormatCurrency(ResponseBankAccounts.Data.Select(x => x.AccountValue).Sum(), "BRL")</small>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div style="border-left: 6px solid @(discountBanlance < 0 ? "#ff0000" :  "#008304") !important;padding-left: 10px;">
+                                <h5 class="mb-1" title="Saldo com desconto das despesas">Saldo com desconto</h5>
+                                <small class="text-body-secondary">
+                                    @CurrencyHelper.FormatCurrency(
+                                        discountBanlance,
+                                        "BRL"
+                                        )
+                                </small>
+                            </div>
+                        </div>
                     </div>
+                    
+                    
                 </li>
 
                 @foreach (var account in ResponseBankAccounts.Data)
@@ -72,4 +92,9 @@
     private List<MessageResult> Alerts = new();
     [Parameter] public BusinessResult<List<Expense>>? ResponseExpense { get; set; }
     [Parameter] public BusinessResult<List<BankAccounts>>? ResponseBankAccounts { get; set; }
+
+    private decimal GetDiscountBalance(decimal accountBalance, decimal totalExpenses)
+    {
+        return accountBalance - totalExpenses;
+    }
 }
