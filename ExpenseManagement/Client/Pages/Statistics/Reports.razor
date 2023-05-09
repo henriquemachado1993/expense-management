@@ -11,36 +11,43 @@
 
 <AlertCustom Alerts=@Alerts></AlertCustom>
 
-<!--Despesas por mes -->
-<div Class="rz-p-0 rz-p-md-12">
-    <RadzenChart>
-        <RadzenValueAxis>
-            <RadzenAxisTitle Text="Value" />
-        </RadzenValueAxis>
-        <RadzenCategoryAxis>
-            <RadzenAxisTitle Text="Month" />
-        </RadzenCategoryAxis>
-        <RadzenColumnSeries Data="@expensesData" CategoryProperty="Month" ValueProperty="Value" />
-    </RadzenChart>
+<div class="container">
+    <!--Despesas por mes -->
+    <div Class="rz-p-0 rz-p-md-12">
+        <RadzenChart>
+            <RadzenValueAxis>
+                <RadzenAxisTitle Text="Valor" />
+            </RadzenValueAxis>
+            <RadzenCategoryAxis>
+                <RadzenAxisTitle Text="Mes" />
+            </RadzenCategoryAxis>
+            <RadzenColumnSeries Data="@ExpensesByMonth.ToArray()" CategoryProperty="Key" ValueProperty="Value" />
+        </RadzenChart>
+    </div>
+
+    <!--Despesas por categoria -->
+    <div Class="rz-p-0 rz-p-md-12">
+        <RadzenChart>
+            <RadzenValueAxis>
+                <RadzenAxisTitle Text="Valor" />
+            </RadzenValueAxis>
+            <RadzenCategoryAxis>
+                <RadzenAxisTitle Text="Categoria" />
+            </RadzenCategoryAxis>
+            <RadzenColumnSeries Data="@ExpensesByCategory.ToArray()" CategoryProperty="Key" ValueProperty="Value" />
+        </RadzenChart>
+    </div>
+
 </div>
 
-<!--Despesas por categoria -->
-@*<div Class="rz-p-0 rz-p-md-12">
-    <RadzenChart>
-        <RadzenValueAxis>
-            <RadzenAxisTitle Text="Revenue" />
-        </RadzenValueAxis>
-        <RadzenCategoryAxis>
-            <RadzenAxisTitle Text="Month" />
-        </RadzenCategoryAxis>
-        <RadzenColumnSeries Data="@revenue" CategoryProperty="Month" ValueProperty="Revenue" />
-    </RadzenChart>
-</div>*@
+
+
 
 
 @code {
 
-    private List<dynamic> expensesData = new();
+    private List<DataItem<decimal>> ExpensesByMonth = new();
+    private List<DataItem<decimal>> ExpensesByCategory = new();
     public List<MessageResult> Alerts = new();
 
     protected override async Task OnInitializedAsync()
@@ -55,21 +62,19 @@
                 return;
             }
 
-            var groupedData = ResponseExpenses.Data.GroupBy(x => x.ExpenseDate.ToString("MMM"));
+            var groupedExpensesByMonth = ResponseExpenses.Data.GroupBy(x => x.ExpenseDate.ToString("MMM"));
+            var groupedExpensesByCategory = ResponseExpenses.Data.GroupBy(x => x.Category.Description);
 
-            foreach (var group in groupedData)
-                expensesData.Add( new DataItem(){ Month = group.Key, Value = group.Sum(x => x.Amount) });
-            
+            foreach (var group in groupedExpensesByMonth)
+                ExpensesByMonth.Add(new DataItem<decimal>() { Key = group.Key, Value = group.Sum(x => x.Amount) });
+
+            foreach (var group in groupedExpensesByCategory)
+                ExpensesByCategory.Add(new DataItem<decimal>() { Key = group.Key, Value = group.Sum(x => x.Amount) });
+
         }
         catch (Exception ex)
         {
             AlertHelper.AddError(Alerts, ex.Message);
         }
-    }
-
-    class DataItem
-    {
-        public string Month { get; set; }
-        public decimal Value { get; set; }
     }
 }
