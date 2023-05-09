@@ -1,46 +1,75 @@
 ﻿@page "/statistics/reports"
+@using ExpenseManagement.Shared.Helpers
+@using ExpenseManagement.Shared.ValueObjects
+@using ExpenseManagement.Shared.Entities
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+@inject HttpClient Http
 
 <h3>Reports</h3>
+
+<AlertCustom Alerts=@Alerts></AlertCustom>
 
 <!--Despesas por mes -->
 <div Class="rz-p-0 rz-p-md-12">
     <RadzenChart>
         <RadzenValueAxis>
-            <RadzenAxisTitle Text="Revenue" />
+            <RadzenAxisTitle Text="Value" />
         </RadzenValueAxis>
         <RadzenCategoryAxis>
-            <RadzenAxisTitle Text="Quarter" />
+            <RadzenAxisTitle Text="Month" />
         </RadzenCategoryAxis>
-        <RadzenColumnSeries Data="@revenue" CategoryProperty="Quarter" ValueProperty="Revenue" />
+        <RadzenColumnSeries Data="@expensesData" CategoryProperty="Month" ValueProperty="Value" />
     </RadzenChart>
 </div>
 
 <!--Despesas por categoria -->
-<div Class="rz-p-0 rz-p-md-12">
+@*<div Class="rz-p-0 rz-p-md-12">
     <RadzenChart>
         <RadzenValueAxis>
             <RadzenAxisTitle Text="Revenue" />
         </RadzenValueAxis>
         <RadzenCategoryAxis>
-            <RadzenAxisTitle Text="Quarter" />
+            <RadzenAxisTitle Text="Month" />
         </RadzenCategoryAxis>
-        <RadzenColumnSeries Data="@revenue" CategoryProperty="Quarter" ValueProperty="Revenue" />
+        <RadzenColumnSeries Data="@revenue" CategoryProperty="Month" ValueProperty="Revenue" />
     </RadzenChart>
-</div>
+</div>*@
 
 
 @code {
-    class DataItem
+
+    private List<dynamic> expensesData = new();
+    public List<MessageResult> Alerts = new();
+
+    protected override async Task OnInitializedAsync()
     {
-        public string Quarter { get; set; }
-        public double Revenue { get; set; }
+        try
+        {
+            var ResponseExpenses = await Http.GetFromJsonAsync<BusinessResult<List<Expense>>>("Expense");
+            if (ResponseExpenses != null && !ResponseExpenses.IsValid)
+            {
+                foreach (var message in ResponseExpenses.Messages)
+                    AlertHelper.AddError(Alerts, message.Message);
+                return;
+            }
+
+            var groupedData = ResponseExpenses.Data.GroupBy(x => x.ExpenseDate.ToString("MMM"));
+
+            foreach (var group in groupedData)
+                expensesData.Add( new DataItem(){ Month = group.Key, Value = group.Sum(x => x.Amount) });
+            
+        }
+        catch (Exception ex)
+        {
+            AlertHelper.AddError(Alerts, ex.Message);
+        }
     }
 
-    DataItem[] revenue = new DataItem[]
-        {
-      new DataItem { Quarter = "Q1", Revenue = 234000 },
-      new DataItem { Quarter = "Q2", Revenue = 284000 },
-      new DataItem { Quarter = "Q3", Revenue = 274000 },
-      new DataItem { Quarter = "Q4", Revenue = 294000 }
-        };
+    class DataItem
+    {
+        public string Month { get; set; }
+        public decimal Value { get; set; }
+    }
 }

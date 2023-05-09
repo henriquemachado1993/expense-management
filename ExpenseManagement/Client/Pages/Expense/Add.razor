@@ -48,6 +48,15 @@
     </div>
 
     <div class="form-group">
+        <label for="description" class="form-label">
+            Data
+        </label>
+        <InputDate id="ExpenseDate" class="form-control" placeholder="Data da despesa"
+                     @bind-Value="Expense.ExpenseDate" />
+        <ValidationMessage For="() => Expense.ExpenseDate" />
+    </div>
+
+    <div class="form-group">
         <label for="title" class="form-label">
             Pago?
         </label>

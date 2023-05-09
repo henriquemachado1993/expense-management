@@ -56,7 +56,7 @@ else
                     <td>@(item.LastModifiedAt == null ? item.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss") : item.LastModifiedAt?.ToString("dd/MM/yyyy HH:mm:ss"))</td>
                     <td>
                         <NavLink class="btn btn-primary" href="@($"bank-accounts/update/{item.Id}")">Alterar</NavLink>
-                        <button class="btn btn-primary" @onclick="() => OpenDialogDelete(item.Id)">Excluir</button>
+                                <button class="btn btn-danger" @onclick="() => OpenDialogDelete(item.Id)">Excluir</button>
                     </td>
                 </tr>
             }

@@ -48,6 +48,7 @@ namespace ExpenseManagement.Services.Services
             entity.Description = expense.Description;
             entity.Amount = expense.Amount;
             entity.IsPaid = expense.IsPaid;
+            entity.ExpenseDate = expense.ExpenseDate;
             entity.CategoryId = expense.CategoryId;
 
             result.Data = _uow.GetRepository<Expense>().Update(entity);
@@ -142,6 +143,24 @@ namespace ExpenseManagement.Services.Services
             resultBo = PagingResult<List<Expense>>.CreateValidResultPaging(result, pageResult);
 
             return resultBo;
+        }
+
+        public BusinessResult<Expense> ConfirmPayment(int id)
+        {
+            var boResult = BusinessResult<Expense>.CreateValidResult();
+
+            var expense = _uow.GetRepository<Expense>().GetById(id);
+
+            if (expense == null)
+                return BusinessResult<Expense>.CreateInvalidResult("Registro não encontrado.");
+            
+            expense.IsPaid = 1;
+            expense.LastModifiedAt = DateTime.Now;
+
+            _uow.GetRepository<Expense>().Update(expense);
+            _uow.Commit();
+
+            return BusinessResult<Expense>.CreateValidResult(expense);
         }
     }
 }

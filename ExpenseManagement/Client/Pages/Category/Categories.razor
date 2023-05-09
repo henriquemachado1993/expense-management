@@ -50,7 +50,7 @@ else
                     <td>@category.Description</td>
                     <td>
                         <NavLink class="btn btn-primary" href="@($"categories/update/{category.Id}")">Alterar</NavLink>
-                        <button class="btn btn-primary" @onclick="() => OpenDialogDelete(category.Id)">Excluir</button>
+                                <button class="btn btn-danger" @onclick="() => OpenDialogDelete(category.Id)">Excluir</button>
                     </td>
                 </tr>
             }

@@ -7,6 +7,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using ExpenseManagement.Shared
+@using System.Text;
 @attribute [Authorize]
 @inject HttpClient Http
 
@@ -61,11 +62,15 @@ else
                             <span class="badge bg-danger">Não</span>
                         }
                     </td>
-                    <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                    <td>@item.ExpenseDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
                     <td>@item.Category.Title</td>
                     <td>
+                        @if (item.IsPaid != 1)
+                        {
+                            <button class="btn btn-success" @onclick="() => OpenDialog(item.Id, DialogCustom.Category.Okay)" title="Confirmar pagamento">Pago</button>
+                        }
                         <NavLink class="btn btn-primary" href="@($"expenses/update/{item.Id}")">Alterar</NavLink>
-                        <button class="btn btn-primary" @onclick="() => OpenDialogDelete(item.Id)">Excluir</button>
+                        <button class="btn btn-danger" @onclick="() => OpenDialog(item.Id, DialogCustom.Category.Delete)">Excluir</button>
                     </td>
                 </tr>
             }
@@ -73,19 +78,30 @@ else
     </table>
 }
 
-@if (DialogIsOpen)
+@if (DialogCustomIsOpen && DialogCategory == DialogCustom.Category.Okay)
 {
-    <DialogCustom Title="Deletar conta"
+    <DialogCustom Title="Confirmar"
+        Message="Tem certeza que deseja confirmar o pagamento?"
+        OnClose="OnDialogCloseConfirmPayment"
+        Type="DialogCategory">
+    </DialogCustom>
+}
+
+@if (DialogCustomIsOpen && DialogCategory == DialogCustom.Category.Delete)
+{
+    <DialogCustom Title="Confirmar"
         Message="Tem certeza que deseja excluir este registro?"
-        OnClose="@OnDialogClose"
-        Type="DialogCustom.Category.Delete">
+        OnClose="OnDialogCloseDelete"
+        Type="DialogCategory">
     </DialogCustom>
 }
 
 @code {
+    @inject NavigationManager NavigationManager;
 
     private int IdExpense;
-    private bool DialogIsOpen = false;
+    private bool DialogCustomIsOpen = false;
+    private DialogCustom.Category DialogCategory;
 
     private BusinessResult<List<Expense>>? ResponseExpenses;
     public List<MessageResult> Alerts = new();
@@ -144,18 +160,63 @@ else
         }
     }
 
-    private void OpenDialogDelete(int id)
+    private async Task ConfirmPayment(int id)
     {
-        DialogIsOpen = true;
+        try
+        {
+            var jsonString = "{\"id\":" + id + "}";
+            var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
+            var httpResponse = await Http.PutAsync($"Expense/confirmpayment", httpContent);
+
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException(
+                    $"Houve um problema. Status Code: {httpResponse.StatusCode}");
+            }
+            else
+            {
+                var response = await httpResponse.Content.ReadFromJsonAsync<BusinessResult<Expense>>();
+                if (response != null && !response.IsValid)
+                {
+                    foreach (var message in response.Messages)
+                        AlertHelper.AddError(Alerts, message.Message);
+                }
+                else
+                {
+                    AlertHelper.AddSuccess(Alerts, "Pagamento confirmado.");
+
+                    NavigationManager.NavigateTo("expenses", true);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            AlertHelper.AddError(Alerts, ex.Message);
+        }
+    }
+
+    private void OpenDialog(int id, DialogCustom.Category type)
+    {
+        DialogCategory = type;
+        DialogCustomIsOpen = true;
         IdExpense = id;
     }
 
-    private async Task OnDialogClose(bool isOk)
+    private async Task OnDialogCloseDelete(bool isOk)
     {
         if (isOk && IdExpense > 0)
         {
             await Delete(IdExpense);
         }
-        DialogIsOpen = false;
+        DialogCustomIsOpen = false;
+    }
+
+    private async Task OnDialogCloseConfirmPayment(bool isOk)
+    {
+        if (isOk && IdExpense > 0)
+        {
+            await ConfirmPayment(IdExpense);
+        }
+        DialogCustomIsOpen = false;
     }
 }
