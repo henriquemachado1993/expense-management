@@ -1,6 +1,7 @@
 ﻿@page "/categories/add"
 @using ExpenseManagement.Shared.Entities
 @using ExpenseManagement.Shared.Enums
+@using ExpenseManagement.Shared.Helpers
 @using ExpenseManagement.Shared.Models.Category
 @using ExpenseManagement.Shared.ValueObjects
 @using Microsoft.AspNetCore.Authorization
@@ -44,14 +45,58 @@
         <InputText id="description" class="form-control" placeholder="Descrição"
                    @bind-Value="Category.Description" />
     </div>
+
+    <div class="form-group">
+        <label for="description" class="form-label">
+            Selecione um icone para a categoria
+        </label>
+
+        @if (IconsCategory != null && IconsCategory.Any())
+        {
+            <div style="max-height:450px;overflow-y:auto;">
+                @foreach (var icon in IconsCategory)
+                {
+                    <div id="@icon.Id" class="col @(icon.Selected ? "item-selected" : "") box-item" @onclick="() => SetIconCategory(icon.Id, icon.Value)" style="width: 45px; float: left;">
+                        <i class="menu-icon fa fa-@icon.Value" aria-hidden="true"></i>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
     <br />
     <button type="submit" class="btn btn-primary">Salvar</button>
     <NavLink class="btn btn-primary" href="@($"categories")">Listagem</NavLink>
 </EditForm>
 
 @code {
-    private Category Category = new();
     public List<MessageResult> Alerts = new();
+
+    private Category Category = new();
+    private List<ItemControl> IconsCategory = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var response = await Http.GetFromJsonAsync<BusinessResult<CategoryIcon>>("Category/GetIconsCategory");
+            if (response != null && !response.IsValid)
+            {
+                foreach (var message in response.Messages)
+                    AlertHelper.AddError(Alerts, message.Message);
+            }
+
+            if (response != null && response.Data != null && response.Data.Icons.Any())
+            {
+                var onlyIconsVisible = response.Data.Icons.Where(x => x.Visible);
+                IconsCategory = onlyIconsVisible.Select(x => new ItemControl() { Id = x.Name, Value = x.Name }).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            AlertHelper.AddError(Alerts, ex.Message);
+        }
+    }
 
     private async Task HandleValidSubmit(EditContext editContext)
     {
@@ -82,5 +127,11 @@
         {
             Alerts.Add(new MessageResult() { Message = ex.Message, TypeCustom = "danger" });
         }
+    }
+
+    private void SetIconCategory(string id, string icon)
+    {
+        Category.Icon = icon;
+        ListItemControlHelper.SetItemSelected(IconsCategory, id);
     }
 }

@@ -86,3 +86,12 @@ a, .btn-link {
     float: left;
     margin-right: 20px;
 }
+
+/*fontwaesome*/
+
+.menu-icon {
+    width: 2rem;
+    font-size: 1.1rem;
+    vertical-align: text-top;
+    top: -2px;
+}

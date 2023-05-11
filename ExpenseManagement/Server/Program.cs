@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-var serverVersion = new MySqlServerVersion(new Version(8, 0, 31));
+var serverVersion = new MySqlServerVersion(new Version(5,7,37));
 builder.Services.AddDbContext<ExpenseManagementContext>(options =>
     options.UseMySql(connectionString, serverVersion, b => b.MigrationsAssembly("ExpenseManagement.Server")));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();

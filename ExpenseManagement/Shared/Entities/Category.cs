@@ -12,7 +12,10 @@ namespace ExpenseManagement.Shared.Entities
         [Required(ErrorMessage = "Este campo é obrigatório.")]
         public string Title { get; set; }
         public string? Description { get; set; }
-        public string? PathImage { get; set; }
+        /// <summary>
+        /// Icone da categoria
+        /// </summary>
+        public string? Icon { get; set; }
 
         // Relationships
         public ICollection<Expense> Expenses { get; set; }

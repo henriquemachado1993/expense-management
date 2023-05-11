@@ -51,6 +51,25 @@ else
             <InputText id="description" class="form-control" placeholder="Descrição"
                    @bind-Value="Category.Description" />
         </div>
+
+        <div class="form-group">
+            <label for="description" class="form-label">
+                Selecione um icone para a categoria
+            </label>
+
+            @if (IconsCategory != null && IconsCategory.Any())
+            {
+                <div style="max-height:450px;overflow-y:auto;">
+                    @foreach (var icon in IconsCategory)
+                    {
+                        <div id="@icon.Id" class="col @(icon.Selected ? "item-selected" : "") box-item" @onclick="() => SetIconCategory(icon.Id, icon.Value)" style="width: 45px; float: left;">
+                            <i class="menu-icon fa fa-@icon.Value" aria-hidden="true"></i>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
         <br />
 
         <button type="submit" class="btn btn-primary">Salvar</button>
@@ -66,6 +85,7 @@ else
 
     private Category Category = new();
     public List<MessageResult> Alerts = new();
+    private List<ItemControl> IconsCategory = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,6 +105,26 @@ else
 
             if (reponse != null)
                 Category = reponse.Data;
+
+
+            // load icons
+            var responseIcon = await Http.GetFromJsonAsync<BusinessResult<CategoryIcon>>("Category/GetIconsCategory");
+            if (responseIcon != null && !responseIcon.IsValid)
+            {
+                foreach (var message in responseIcon.Messages)
+                    AlertHelper.AddError(Alerts, message.Message);
+            }
+
+            if (responseIcon != null && responseIcon.Data != null && responseIcon.Data.Icons.Any())
+            {
+                var onlyIconsVisible = responseIcon.Data.Icons.Where(x => x.Visible);
+                IconsCategory = onlyIconsVisible.Select(x => new ItemControl() { Id = x.Name, Value = x.Name }).ToList();
+
+                if (IconsCategory.Any() && Category != null && !string.IsNullOrEmpty(Category.Icon))
+                {
+                    ListItemControlHelper.SetItemSelected(IconsCategory, Category.Icon.ToString());
+                }
+            }
 
         }
         catch (Exception ex)
@@ -122,5 +162,11 @@ else
         {
             Alerts.Add(new MessageResult() { Message = ex.Message, TypeCustom = "danger" });
         }
+    }
+
+    private void SetIconCategory(string id, string icon)
+    {
+        Category.Icon = icon;
+        ListItemControlHelper.SetItemSelected(IconsCategory, id);
     }
 }

@@ -54,5 +54,9 @@ namespace ExpenseManagement.Shared.Helpers
         /// Indica que o item foi selecionado
         /// </summary>
         public bool Selected { get; set; }
+        /// <summary>
+        /// Icone
+        /// </summary>
+        public string Icon { get; set; }
     }
 }

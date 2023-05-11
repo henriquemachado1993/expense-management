@@ -94,6 +94,10 @@ else
                         @foreach (var item in ItensCategory)
                         {
                             <div id="@item.Id" class="col @(item.Selected ? "item-selected" : "") box-item" @onclick="() => SetCategory(item.Id)">
+                                @if (!string.IsNullOrWhiteSpace(item.Icon))
+                                {
+                                    <i class="menu-icon fa fa-@item.Icon" aria-hidden="true"></i>
+                                }
                                 @item.Value
                                 @if (item.Selected)
                                 {
@@ -174,7 +178,7 @@ else
 
             if (Categories != null && Categories.Data != null && Categories.Data.Any())
             {
-                ItensCategory = ListItemControlHelper.GetListItensControl(Categories.Data.ToDictionary(x => x.Id.ToString(), x => x.Title));
+                ItensCategory = Categories.Data.Select(x => new ItemControl() { Id = x.Id.ToString(), Value = x.Title, Icon = x.Icon }).ToList(); ;
 
                 if (Expense != null)
                 {

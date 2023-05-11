@@ -47,7 +47,7 @@ namespace ExpenseManagement.Services.Services
 
             entity.Title = category.Title;
             entity.Description = category.Description;
-            entity.PathImage = "";
+            entity.Icon = category.Icon;
             entity.LastModifiedAt = DateTime.Now;
 
             result.Data = _uow.GetRepository<Category>().Update(entity);

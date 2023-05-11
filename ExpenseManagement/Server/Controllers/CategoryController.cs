@@ -1,9 +1,11 @@
 ﻿using ExpenseManagement.Shared.Entities;
+using ExpenseManagement.Shared.Helpers;
 using ExpenseManagement.Shared.Interfaces.Services;
 using ExpenseManagement.Shared.Models.Category;
 using ExpenseManagement.Shared.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace ExpenseManagement.Server.Controllers
 {
@@ -33,6 +35,33 @@ namespace ExpenseManagement.Server.Controllers
         {
             var service = _serviceProvider.GetRequiredService<ICategoryService>();
             return service.GetById(id);
+        }
+
+        [HttpGet("GetIconsCategory")]
+        public BusinessResult<CategoryIcon> GetIconsCategory()
+        {
+            try
+            {
+                string path = Path.Combine(ConfigHelper.GetEnvironment().ContentRootPath, "json\\icons.json"); ;
+                CategoryIcon? response = new CategoryIcon();
+
+                if (System.IO.File.Exists(path))
+                {
+                    string json = System.IO.File.ReadAllText(path);
+                    if(!string.IsNullOrEmpty(json))
+                        response = JsonConvert.DeserializeObject<CategoryIcon>(json);
+                }
+                else
+                {
+                    return BusinessResult<CategoryIcon>.CreateInvalidResult("Não foi possível obter os icones.");
+                }
+
+                return BusinessResult<CategoryIcon>.CreateValidResult(response);
+            }
+            catch (Exception ex)
+            {
+                return BusinessResult<CategoryIcon>.CreateInvalidResult(ex);
+            }
         }
 
         [HttpPost]
