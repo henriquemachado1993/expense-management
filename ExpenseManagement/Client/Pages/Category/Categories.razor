@@ -37,7 +37,7 @@ else
             <tr>
                 <th>#</th>
                 <th>Título</th>
-                <th>Descrição</th>
+                <th>Icone</th>
                 <th>Ação</th>
             </tr>
         </thead>
@@ -47,7 +47,7 @@ else
                 <tr>
                     <td>@category.Id</td>
                     <td>@category.Title</td>
-                    <td>@category.Description</td>
+                    <td><i class="menu-icon fa fa-@category.Icon" aria-hidden="true"></i></td>
                     <td>
                         <NavLink class="btn btn-primary" href="@($"categories/update/{category.Id}")">Alterar</NavLink>
                                 <button class="btn btn-danger" @onclick="() => OpenDialogDelete(category.Id)">Excluir</button>

@@ -14,6 +14,8 @@ namespace ExpenseManagement.Shared.Enuns
         [Display(Name = "Conta salário")]
         SalaryAccount = 2,
         [Display(Name = "Conta poupança")]
-        SavingsAccount = 3
+        SavingsAccount = 3, 
+        [Display(Name = "Conta de Investimentos")]
+        InvestimentsAccount = 4,
     }
 }

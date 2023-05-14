@@ -39,9 +39,9 @@ else
         <thead>
             <tr>
                 <th>Descrição</th>
+                <th title="Vencimento">Vencimento</th>
                 <th>Valor R$</th>
-                <th>Pago</th>
-                <th>Data</th>
+                <th>Situação</th>
                 <th>Categoria</th>
                 <th>Ação</th>
             </tr>
@@ -51,18 +51,18 @@ else
             {
                 <tr>
                     <td>@item.Description</td>
+                    <td>@item.ExpenseDate.ToString("dd/MM/yyyy")</td>
                     <td>@CurrencyHelper.FormatCurrency(item.Amount, "BRL")</td>
                     <td>
                         @if (item.IsPaid == 1)
                         {
-                            <span class="badge bg-success">Sim</span>
+                            <span class="badge bg-success" title="Valor pago">Pago</span>
                         }
                         else
                         {
-                            <span class="badge bg-danger">Não</span>
+                            <span class="badge bg-warning" title="Ainda não foi pago">Pendente</span>
                         }
                     </td>
-                    <td>@item.ExpenseDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
                     <td>@item.Category.Title</td>
                     <td>
                         @if (item.IsPaid != 1)
@@ -74,6 +74,12 @@ else
                     </td>
                 </tr>
             }
+
+            <tr>
+                <td>Total de despesas</td>
+                <td colspan="5">@(CurrencyHelper.FormatCurrency(ResponseExpenses.Data.Where(x => x.IsPaid == 0).Sum(x => x.Amount), "BRL"))</td>
+            </tr>
+
         </tbody>
     </table>
 }
@@ -81,18 +87,18 @@ else
 @if (DialogCustomIsOpen && DialogCategory == DialogCustom.Category.Okay)
 {
     <DialogCustom Title="Confirmar"
-        Message="Tem certeza que deseja confirmar o pagamento?"
-        OnClose="OnDialogCloseConfirmPayment"
-        Type="DialogCategory">
+                  Message="Tem certeza que deseja confirmar o pagamento?"
+                  OnClose="OnDialogCloseConfirmPayment"
+                  Type="DialogCategory">
     </DialogCustom>
 }
 
 @if (DialogCustomIsOpen && DialogCategory == DialogCustom.Category.Delete)
 {
     <DialogCustom Title="Confirmar"
-        Message="Tem certeza que deseja excluir este registro?"
-        OnClose="OnDialogCloseDelete"
-        Type="DialogCategory">
+                  Message="Tem certeza que deseja excluir este registro?"
+                  OnClose="OnDialogCloseDelete"
+                  Type="DialogCategory">
     </DialogCustom>
 }
 

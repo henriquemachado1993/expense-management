@@ -37,9 +37,7 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>#</th>
-                <th>Título</th>
-                <th>Tipo</th>
+                <th>Descrição</th>
                 <th>Total R$</th>
                 <th>Atualizado em</th>
                 <th>Ação</th>
@@ -49,11 +47,9 @@ else
             @foreach (var item in bankAccounts.Data)
             {
                 <tr>
-                    <td>@item.Id</td>
-                    <td>@item.Title</td>
-                    <td>@(((TypeBankAccount)item.Type).GetDisplayName())</td>
+                    <td>@item.Title - @(((TypeBankAccount)item.Type).GetDisplayName())</td>
                     <td>@CurrencyHelper.FormatCurrency(item.AccountValue, "BRL")</td>
-                    <td>@(item.LastModifiedAt == null ? item.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss") : item.LastModifiedAt?.ToString("dd/MM/yyyy HH:mm:ss"))</td>
+                    <td>@(item.LastModifiedAt == null || item.LastModifiedAt == DateTime.MinValue ? item.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss") : item.LastModifiedAt?.ToString("dd/MM/yyyy HH:mm:ss"))</td>
                     <td>
                         <NavLink class="btn btn-primary" href="@($"bank-accounts/update/{item.Id}")">Alterar</NavLink>
                                 <button class="btn btn-danger" @onclick="() => OpenDialogDelete(item.Id)">Excluir</button>

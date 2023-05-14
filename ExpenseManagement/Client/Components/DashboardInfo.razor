@@ -22,6 +22,7 @@
                 <p class="card-text">Você tem @ResponseExpense.Data.Where(p => p.IsPaid != 1).Count() contas a pagar no total de <strong>@CurrencyHelper.FormatCurrency(ResponseExpense.Data.Where(p => p.IsPaid != 1).Select(x => x.Amount).Sum(), "BRL")</strong></p>
             }
             <a href="@($"expenses")" class="btn btn-primary">Ver despesas</a>
+            <a href="@($"expenses/add")" class="btn btn-primary">Adicionar</a>
         </div>
     </div>
     <br />

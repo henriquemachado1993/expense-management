@@ -6,7 +6,7 @@
 
 <AuthorizeView>
     <Authorized>
-        <a href="authentication/profile">Olá, @context.User.Identity?.Name!</a>
+        <a href="authentication/profile">Olá, @GetFirstNameEmail(context.User.Identity?.Name)</a>
         <button class="nav-link btn btn-link" @onclick="BeginSignOut">Sair</button>
     </Authorized>
     <NotAuthorized>
@@ -21,4 +21,6 @@
         await SignOutManager.SetSignOutState();
         Navigation.NavigateTo("authentication/logout");
     }
+
+    private string? GetFirstNameEmail(string? email) => email != null && !string.IsNullOrEmpty(email) ? email.Split("@")[0] : email;
 }
