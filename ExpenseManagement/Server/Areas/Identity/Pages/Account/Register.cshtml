@@ -1,67 +1,71 @@
 ﻿@page
 @model RegisterModel
 @{
-    ViewData["Title"] = "Register";
+    Layout = "/Areas/Identity/Pages/_Layout.cshtml";
 }
 
-<h1>@ViewData["Title"]</h1>
-
-<div class="row">
-    <div class="col-md-4">
-        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Create a new account.</h2>
-            <hr />
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-floating">
-                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" />
-                <label asp-for="Input.Email"></label>
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
-            </div>
-            <div class="form-floating">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" />
-                <label asp-for="Input.Password"></label>
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
-            </div>
-            <div class="form-floating">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
-                <label asp-for="Input.ConfirmPassword"></label>
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-            </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </form>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-                            about setting up this ASP.NET application to support logging in via external services</a>.
-                        </p>
-                    </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 100vh">
+    <div class="d-flex flex-column justify-content-between">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-10">
+                <div class="card card-default mb-0">
+                    <div class="card-header pb-0">
+                        <div class="app-brand w-100 d-flex justify-content-center border-bottom-0">
+                            <a class="w-auto pl-0" href="/">
+                                <img src="~/images/logo.png" alt="Gerênciamento de despesas">
+                                <span class="brand-name text-dark">GERÊNCIA DE DESPESAS</span>
+                            </a>
                         </div>
-                    </form>
-                }
-            }
-        </section>
+                    </div>
+                    <div class="card-body px-5 pb-5 pt-0">
+
+                        <h4 class="text-dark mb-6 text-center">Criar uma conta nova</h4>
+
+                        <form id="account" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="row">
+                                <div class="form-group col-md-12 mb-4">
+                                    <input asp-for="Input.Email" type="email" class="form-control input-lg" id="email" aria-describedby="emailHelp" autocomplete="username"
+                                           placeholder="E-mail" aria-required="true">
+                                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                                </div>
+                                <div class="form-group col-md-12 ">
+                                    <input asp-for="Input.Password" type="password" class="form-control input-lg" id="password" placeholder="Senha" autocomplete="new-password" aria-required="true">
+                                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group col-md-12 ">
+                                    <input asp-for="Input.ConfirmPassword" type="password" class="form-control input-lg" id="password" placeholder="Confirmar Senha" autocomplete="new-password" aria-required="true">
+                                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-12">
+
+                                    <div class="d-flex justify-content-between mb-3">
+
+                                        <div class="custom-control custom-checkbox mr-3 mb-3">
+                                            <input type="checkbox" class="custom-control-input" asp-for="Input.PolicyPrivacy">
+                                            <label asp-for="Input.PolicyPrivacy" class="custom-control-label">Eu concordo com os termos e condições.</label>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary btn-pill mb-4">INCREVER-SE</button>
+
+                                    <p>
+                                        já tem uma conta?
+                                        <a class="text-blue" href="./Login">Entrar</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
+
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+<partial name="_ValidationScriptsPartial" />
 }
