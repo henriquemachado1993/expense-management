@@ -28,6 +28,43 @@ namespace ExpenseManagement.Server.Controllers
             return service.GetFiltered(new QueryCriteria<Expense>() { Expression = x => x.UserId == User.GetId() });
         }
 
+        [HttpGet("recurrent-expenses")]
+        public BusinessResult<List<Expense>> RecurrentExpenses()
+        {
+            var service = _serviceProvider.GetRequiredService<IExpenseService>();
+           
+            var result = service.GetFiltered(new QueryCriteria<Expense>()
+            {
+                Expression = x => x.UserId == User.GetId() && x.IsMonthlyRecurrence == 1,
+                OrderBy = x => x.ExpenseDate,
+                Ascending = false
+            });
+            return result;
+        }
+
+        [HttpGet("recurrent-expenses/{month}")]
+        public BusinessResult<List<Expense>> RecurrentExpenses(int month)
+        {
+            var service = _serviceProvider.GetRequiredService<IExpenseService>();
+
+            var result = service.GetFiltered(new QueryCriteria<Expense>()
+            {
+                Expression = x => x.UserId == User.GetId() && x.IsMonthlyRecurrence == 1 && x.ExpenseDate.Month == month && x.ExpenseDate.Year == DateTime.Now.Year,
+                OrderBy = x => x.ExpenseDate,
+                Ascending = false
+            });
+            return result;
+        }
+
+        [HttpPost("recurrent-expenses")]
+        public BusinessResult<List<Expense>> RecurrentExpenses(List<Expense> expenses)
+        {
+            var service = _serviceProvider.GetRequiredService<IExpenseService>();
+            var userId = User.GetId();
+            expenses.ForEach(expense => expense.UserId = userId);
+            return service.GenerateRecurringExpenses(expenses);
+        }
+
         [HttpGet("{id}")]
         public BusinessResult<Expense> Get(int id)
         {

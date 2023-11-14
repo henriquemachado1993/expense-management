@@ -15,6 +15,7 @@ namespace ExpenseManagement.Shared.Entities
         public decimal Amount { get; set; }
         [Required(ErrorMessage = "Este campo é obrigatório.")]
         public int IsPaid { get; set; }
+        public int IsMonthlyRecurrence { get; set; }
 
         [Required(ErrorMessage = "Este campo é obrigatório.")]
         public DateTime ExpenseDate { get; set; }

@@ -48,6 +48,7 @@ namespace ExpenseManagement.Services.Services
             entity.Description = expense.Description;
             entity.Amount = expense.Amount;
             entity.IsPaid = expense.IsPaid;
+            entity.IsMonthlyRecurrence = expense.IsMonthlyRecurrence;
             entity.ExpenseDate = expense.ExpenseDate;
             entity.CategoryId = expense.CategoryId;
 
@@ -153,7 +154,7 @@ namespace ExpenseManagement.Services.Services
 
             if (expense == null)
                 return BusinessResult<Expense>.CreateInvalidResult("Registro não encontrado.");
-            
+
             expense.IsPaid = 1;
             expense.LastModifiedAt = DateTime.Now;
 
@@ -161,6 +162,38 @@ namespace ExpenseManagement.Services.Services
             _uow.Commit();
 
             return BusinessResult<Expense>.CreateValidResult(expense);
+        }
+
+        public BusinessResult<List<Expense>> GenerateRecurringExpenses(List<Expense> expenses)
+        {
+            if (expenses == null || !expenses.Any())
+                return BusinessResult<List<Expense>>.CreateInvalidResult("Não foi possível gerar despesas.");
+
+            var result = BusinessResult<List<Expense>>.CreateValidResult(expenses);
+
+            var listAddExpense = new List<Expense>();
+
+            foreach (var item in expenses)
+            {
+                listAddExpense.Add(new Expense()
+                {
+                    CreatedAt = DateTime.Now,
+                    Description = item.Description,
+                    Amount = item.Amount,
+                    IsPaid = 0,
+                    IsMonthlyRecurrence = item.IsMonthlyRecurrence,
+                    ExpenseDate = item.ExpenseDate,
+                    CategoryId = item.CategoryId,
+                    UserId = item.UserId,
+                });
+            }
+
+            result.Data = _uow.GetRepository<Expense>().AddMultiple(listAddExpense).ToList();
+
+            _uow.Commit();
+
+            return result;
+
         }
     }
 }

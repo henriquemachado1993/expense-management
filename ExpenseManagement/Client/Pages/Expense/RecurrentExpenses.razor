@@ -1,0 +1,205 @@
+﻿@page "/expenses/recurrent-expenses"
+@using ExpenseManagement.Shared.Entities
+@using ExpenseManagement.Shared.Enuns
+@using ExpenseManagement.Shared.Extensions
+@using ExpenseManagement.Shared.Helpers
+@using ExpenseManagement.Shared.ValueObjects
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using ExpenseManagement.Shared
+@using System.Text;
+
+@attribute [Authorize]
+@inject HttpClient Http
+
+<PageTitle>Despesas Recorrentes (Mensal)</PageTitle>
+
+<h1>Despesas Recorrentes (Mensal)</h1>
+
+@if (Alerts.Any())
+{
+    @foreach (var alert in Alerts)
+    {
+        <div class="alert alert-@alert.TypeCustom alert-dismissible fade show" role="alert">
+            @((MarkupString)@alert.Message)
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+}
+
+@if (ResponseExpenses == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    @foreach (var month in ListLastTwoMonthsInNumber())
+    {
+        <NavLink class="btn btn-primary" href="@($"Expense/recurrent-expenses/{month}")">Mês @month</NavLink>
+    }
+
+    <EditForm Model="@ResponseExpenses.Data" OnValidSubmit="@HandleValidSubmit">
+        <hr />
+
+        @if (ResponseExpenses.Data != null)
+        {
+            @foreach (var item in ResponseExpenses.Data)
+            {
+                <div class="row" id="@item.Id">
+                    <div class="col-md-3">
+                        <label for="Description-{@item.Id}" class="form-label">
+                            Descrição
+                        </label>
+                        <InputText id="@("Description-"+@item.Id)" class="form-control" placeholder="Descrição da despesa"
+                       @bind-Value="item.Description" />
+                        <ValidationMessage For="() => item.Description" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="Amount-{@item.Id}" class="form-label">
+                            Valor
+                        </label>
+                        <InputNumber id="@("Amount-"+@item.Id)" class="form-control" placeholder="Valor total da despesa"
+                         @bind-Value="item.Amount" />
+                        <ValidationMessage For="() => item.Amount" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="ExpenseDate-{@item.Id}" class="form-label">
+                            Data
+                        </label>
+                        <InputDate id="@("ExpenseDate-"+@item.Id)" class="form-control" placeholder="Data da despesa"
+                       @bind-Value="item.ExpenseDate" />
+                        <ValidationMessage For="() => item.ExpenseDate" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-danger" @onclick="() => OpenDialog(item.Id, DialogCustom.Category.Delete)">Ignorar</button>
+                    </div>
+                </div>
+
+                <hr />
+            }
+
+            <button type="submit" class="btn btn-primary">Gerar novas despesas</button>
+        }
+    </EditForm>
+}
+
+@if (DialogCustomIsOpen && DialogCategory == DialogCustom.Category.Delete)
+{
+    <DialogCustom Title="Confirmar"
+              Message="Tem certeza ignorar esse item de ser gerado para o mês seguinte?"
+              OnClose="OnDialogCloseDelete"
+              Type="DialogCategory">
+    </DialogCustom>
+}
+
+@code {
+    @inject NavigationManager NavigationManager;
+
+    private int IdExpense;
+    private bool DialogCustomIsOpen = false;
+    private DialogCustom.Category DialogCategory;
+
+    private List<string> MonthsYear = new List<string>();
+
+    private BusinessResult<List<Expense>>? ResponseExpenses;
+    private List<int> ListOfExpensesToIgnore = new List<int>();
+
+    public List<MessageResult> Alerts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            ResponseExpenses = await Http.GetFromJsonAsync<BusinessResult<List<Expense>>>("Expense/recurrent-expenses");
+
+            if (ResponseExpenses != null && !ResponseExpenses.IsValid)
+            {
+                foreach (var message in ResponseExpenses.Messages)
+                    AlertHelper.AddError(Alerts, message.Message);
+            }
+            else
+            {
+                ResponseExpenses?.Data?.ForEach(expense => expense.ExpenseDate = expense.ExpenseDate.AddMonths(1));
+            }
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception ex)
+        {
+            AlertHelper.AddError(Alerts, ex.Message);
+        }
+    }
+
+    private async Task HandleValidSubmit(EditContext editContext)
+    {
+        try
+        {
+
+            var httpResponse = await Http.PostAsJsonAsync<List<Expense>>("Expense/recurrent-expenses", ((List<Expense>)editContext.Model).Where(x => !ListOfExpensesToIgnore.Contains(x.Id)).ToList());
+
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException(
+                    $"Houve um problema. Status Code: {httpResponse.StatusCode}");
+            }
+            else
+            {
+                Alerts.Add(new MessageResult() { Message = "As despesas foram geradas com sucesso! Verifique a página de despesas <a href=\"expenses\"> CLICANDO AQUI </a>", TypeCustom = "success" });
+            }
+        }
+        catch (Exception ex)
+        {
+            Alerts.Add(new MessageResult() { Message = ex.Message, TypeCustom = "danger" });
+        }
+    }
+
+    private List<int> ListLastTwoMonthsInNumber()
+    {
+        DateTime today = DateTime.Now;
+
+        List<int> lastTwoMonths = new List<int>();
+
+        for (int i = 0; i < 2; i++)
+        {
+            DateTime currentMonth = today.AddMonths(-i);
+            int numberMonth = currentMonth.Month;
+            lastTwoMonths.Add(numberMonth);
+        }
+
+        return lastTwoMonths;
+    }
+
+    private void Delete(int id)
+    {
+        try
+        {
+            ListOfExpensesToIgnore.Add(id);
+        }
+        catch (Exception ex)
+        {
+            AlertHelper.AddError(Alerts, ex.Message);
+        }
+    }
+
+
+    private void OpenDialog(int id, DialogCustom.Category type)
+    {
+        DialogCategory = type;
+        DialogCustomIsOpen = true;
+        IdExpense = id;
+    }
+
+    private void OnDialogCloseDelete(bool isOk)
+    {
+        if (isOk && IdExpense > 0)
+        {
+            Delete(IdExpense);
+        }
+        DialogCustomIsOpen = false;
+    }
+}

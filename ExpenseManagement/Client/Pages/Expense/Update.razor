@@ -68,6 +68,20 @@ else
 
         <div class="form-group">
             <label for="title" class="form-label">
+                Recorrência Mensal?
+            </label>
+            <br />
+            <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+                <InputRadioGroup class="form-control" @bind-Value="Expense.IsMonthlyRecurrence">
+                    <InputRadio Value="1" class="btn-check " id="btncheckMonthlyRecurrenceYes" /> <label class="btn btn-outline-primary" for="btncheckMonthlyRecurrenceYes">Sim</label>
+                    <InputRadio Value="0" class="btn-check" id="btncheckMonthlyRecurrenceNo" checked="checked" /> <label class="btn btn-outline-primary" for="btncheckMonthlyRecurrenceNo">Não</label>
+                </InputRadioGroup>
+            </div>
+            <ValidationMessage For="() => Expense.IsMonthlyRecurrence" />
+        </div>
+
+        <div class="form-group">
+            <label for="title" class="form-label">
                 Pago?
             </label>
             <br />
