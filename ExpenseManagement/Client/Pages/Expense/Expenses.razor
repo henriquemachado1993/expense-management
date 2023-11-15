@@ -76,31 +76,41 @@ else
                     </td>
                 </tr>
             }
-
-            <tr>
-                <td>Total de despesas</td>
-                <td colspan="5">@(CurrencyHelper.FormatCurrency(ResponseExpenses.Data.Where(x => x.IsPaid == 0).Sum(x => x.Amount), "BRL"))</td>
-            </tr>
-
         </tbody>
     </table>
+
+    <br />
+    <nav aria-label="navigation">
+        <ul class="pagination justify-content-center">
+
+            <li class="page-item">
+                <a class="page-link" @onclick="() => GetPaginated(ResponseExpenses.Paging.PreviousPage)" >Anterior</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="javascript:void(0);">@ResponseExpenses.Paging.Offset</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" @onclick="() => GetPaginated(ResponseExpenses.Paging.NextPage)" >Próxima</a>
+            </li>
+        </ul>
+    </nav>
 }
 
 @if (DialogCustomIsOpen && DialogCategory == DialogCustom.Category.Okay)
 {
     <DialogCustom Title="Confirmar"
-                  Message="Tem certeza que deseja confirmar o pagamento?"
-                  OnClose="OnDialogCloseConfirmPayment"
-                  Type="DialogCategory">
+              Message="Tem certeza que deseja confirmar o pagamento?"
+              OnClose="OnDialogCloseConfirmPayment"
+              Type="DialogCategory">
     </DialogCustom>
 }
 
 @if (DialogCustomIsOpen && DialogCategory == DialogCustom.Category.Delete)
 {
     <DialogCustom Title="Confirmar"
-                  Message="Tem certeza que deseja excluir este registro?"
-                  OnClose="OnDialogCloseDelete"
-                  Type="DialogCategory">
+              Message="Tem certeza que deseja excluir este registro?"
+              OnClose="OnDialogCloseDelete"
+              Type="DialogCategory">
     </DialogCustom>
 }
 
@@ -111,14 +121,14 @@ else
     private bool DialogCustomIsOpen = false;
     private DialogCustom.Category DialogCategory;
 
-    private BusinessResult<List<Expense>>? ResponseExpenses;
+    private PagingResult<List<Expense>>? ResponseExpenses;
     public List<MessageResult> Alerts = new();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            ResponseExpenses = await Http.GetFromJsonAsync<BusinessResult<List<Expense>>>("Expense");
+            ResponseExpenses = await Http.GetFromJsonAsync<PagingResult<List<Expense>>>("Expense");
             if (ResponseExpenses != null && !ResponseExpenses.IsValid)
             {
                 foreach (var message in ResponseExpenses.Messages)
@@ -128,6 +138,23 @@ else
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
+        }
+        catch (Exception ex)
+        {
+            AlertHelper.AddError(Alerts, ex.Message);
+        }
+    }
+
+    private async Task GetPaginated(int currentPage)
+    {
+        try
+        {
+            ResponseExpenses = await Http.GetFromJsonAsync<PagingResult<List<Expense>>>($"Expense/page/{currentPage}");
+            if (ResponseExpenses != null && !ResponseExpenses.IsValid)
+            {
+                foreach (var message in ResponseExpenses.Messages)
+                    AlertHelper.AddError(Alerts, message.Message);
+            }
         }
         catch (Exception ex)
         {

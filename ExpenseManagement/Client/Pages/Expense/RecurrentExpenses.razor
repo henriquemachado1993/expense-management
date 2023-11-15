@@ -33,10 +33,14 @@
 }
 else
 {
-    @foreach (var month in ListLastTwoMonthsInNumber())
-    {
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        Essa tela permite gerar despesas recorrentes apartir de despesas passadas! Caso não queira incluir alguma das despesas listadas abaixo, basta ignora-la.
+    </div>
+
+    @*@foreach (var month in ListLastTwoMonthsInNumber())
+        {
         <NavLink class="btn btn-primary" href="@($"Expense/recurrent-expenses/{month}")">Mês @month</NavLink>
-    }
+        }*@
 
     <EditForm Model="@ResponseExpenses.Data" OnValidSubmit="@HandleValidSubmit">
         <hr />
@@ -51,7 +55,7 @@ else
                             Descrição
                         </label>
                         <InputText id="@("Description-"+@item.Id)" class="form-control" placeholder="Descrição da despesa"
-                       @bind-Value="item.Description" />
+                       @bind-Value="item.Description" disabled="@ListOfExpensesToIgnore.Contains(item.Id)" />
                         <ValidationMessage For="() => item.Description" />
                     </div>
 
@@ -60,7 +64,7 @@ else
                             Valor
                         </label>
                         <InputNumber id="@("Amount-"+@item.Id)" class="form-control" placeholder="Valor total da despesa"
-                         @bind-Value="item.Amount" />
+                         @bind-Value="item.Amount" disabled="@ListOfExpensesToIgnore.Contains(item.Id)" />
                         <ValidationMessage For="() => item.Amount" />
                     </div>
 
@@ -69,38 +73,38 @@ else
                             Data
                         </label>
                         <InputDate id="@("ExpenseDate-"+@item.Id)" class="form-control" placeholder="Data da despesa"
-                       @bind-Value="item.ExpenseDate" />
+                       @bind-Value="item.ExpenseDate" disabled="@ListOfExpensesToIgnore.Contains(item.Id)" />
                         <ValidationMessage For="() => item.ExpenseDate" />
                     </div>
 
                     <div class="col-md-3">
-                        <button type="button" class="btn btn-danger" @onclick="() => OpenDialog(item.Id, DialogCustom.Category.Delete)">Ignorar</button>
+                        <label for="Action-{@item.Id}" class="form-label">
+                            Ação
+                        </label><br />
+
+                        @if (!ListOfExpensesToIgnore.Contains(item.Id))
+                        {
+                            <button type="button" class="btn btn-danger" @onclick="() => IncludeOrRemoveIgnored(item.Id)">Ignorar</button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-primary" @onclick="() => IncludeOrRemoveIgnored(item.Id, true)">Incluir</button>
+                        }
                     </div>
                 </div>
-
                 <hr />
             }
 
             <button type="submit" class="btn btn-primary">Gerar novas despesas</button>
+            <br />
         }
     </EditForm>
-}
-
-@if (DialogCustomIsOpen && DialogCategory == DialogCustom.Category.Delete)
-{
-    <DialogCustom Title="Confirmar"
-              Message="Tem certeza ignorar esse item de ser gerado para o mês seguinte?"
-              OnClose="OnDialogCloseDelete"
-              Type="DialogCategory">
-    </DialogCustom>
 }
 
 @code {
     @inject NavigationManager NavigationManager;
 
     private int IdExpense;
-    private bool DialogCustomIsOpen = false;
-    private DialogCustom.Category DialogCategory;
 
     private List<string> MonthsYear = new List<string>();
 
@@ -139,7 +143,6 @@ else
     {
         try
         {
-
             var httpResponse = await Http.PostAsJsonAsync<List<Expense>>("Expense/recurrent-expenses", ((List<Expense>)editContext.Model).Where(x => !ListOfExpensesToIgnore.Contains(x.Id)).ToList());
 
             if (!httpResponse.IsSuccessStatusCode)
@@ -149,7 +152,16 @@ else
             }
             else
             {
-                Alerts.Add(new MessageResult() { Message = "As despesas foram geradas com sucesso! Verifique a página de despesas <a href=\"expenses\"> CLICANDO AQUI </a>", TypeCustom = "success" });
+
+                var result = httpResponse.Content.ReadFromJsonAsync<BusinessResult<List<Expense>>>().Result;
+                if (result != null && !result.IsValid)
+                {
+                    result.Messages.ForEach(x => Alerts.Add(new MessageResult() { Message = x.Message, TypeCustom = "danger" }));
+                }
+                else
+                {
+                    Alerts.Add(new MessageResult() { Message = "As despesas foram geradas com sucesso! Verifique a página de despesas <a href=\"expenses\"> CLICANDO AQUI </a>", TypeCustom = "success" });
+                }
             }
         }
         catch (Exception ex)
@@ -174,32 +186,19 @@ else
         return lastTwoMonths;
     }
 
-    private void Delete(int id)
+    private void IncludeOrRemoveIgnored(int id, bool isRemove = false)
     {
         try
         {
-            ListOfExpensesToIgnore.Add(id);
+            if (isRemove)
+                ListOfExpensesToIgnore.Remove(id);
+            else
+                ListOfExpensesToIgnore.Add(id);
+
         }
         catch (Exception ex)
         {
             AlertHelper.AddError(Alerts, ex.Message);
         }
-    }
-
-
-    private void OpenDialog(int id, DialogCustom.Category type)
-    {
-        DialogCategory = type;
-        DialogCustomIsOpen = true;
-        IdExpense = id;
-    }
-
-    private void OnDialogCloseDelete(bool isOk)
-    {
-        if (isOk && IdExpense > 0)
-        {
-            Delete(IdExpense);
-        }
-        DialogCustomIsOpen = false;
     }
 }

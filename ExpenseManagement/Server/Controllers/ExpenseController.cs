@@ -22,11 +22,20 @@ namespace ExpenseManagement.Server.Controllers
         }
 
         [HttpGet]
-        public BusinessResult<List<Expense>> Get()
+        public PagingResult<List<Expense>> Get()
         {
             var service = _serviceProvider.GetRequiredService<IExpenseService>();
-            return service.GetFiltered(new QueryCriteria<Expense>() { Expression = x => x.UserId == User.GetId() });
+            return service.GetPaginated(10, 1 ,new QueryCriteria<Expense>() { Expression = x => x.UserId == User.GetId() });
         }
+
+
+        [HttpGet("page/{currentpage}")]
+        public PagingResult<List<Expense>> ExpensePage(int? currentpage)
+        {
+            var service = _serviceProvider.GetRequiredService<IExpenseService>();
+            return service.GetPaginated(10, currentpage ?? 0, new QueryCriteria<Expense>() { Expression = x => x.UserId == User.GetId() });
+        }
+
 
         [HttpGet("recurrent-expenses")]
         public BusinessResult<List<Expense>> RecurrentExpenses()
