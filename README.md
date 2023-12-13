@@ -6,11 +6,11 @@ O projeto é uma exploração prática do Blazor WebAssembly Hosted em conjunto 
 
 ## Funcionalidades Principais:
 
-*Controle de Finanças Pessoais: Desenvolvimento de um sistema intuitivo e fácil de usar para gerenciar finanças pessoais.
-*Controle de Despesas: Página dedicada ao registro e acompanhamento detalhado das despesas, oferecendo uma visão clara dos gastos.
-*Gestão de Categorias de Despesas: Recurso que permite categorizar e organizar as despesas de acordo com diferentes tipos, facilitando a análise.
-*Controle de Contas Bancárias: Página destinada ao gerenciamento de contas bancárias, proporcionando uma visão consolidada dos saldos e transações.
-*Estatísticas Simplificadas com Gráficos: Apresentação visual de estatísticas financeiras por meio de gráficos, proporcionando insights rápidos e eficazes.
+* Controle de Finanças Pessoais: Desenvolvimento de um sistema intuitivo e fácil de usar para gerenciar finanças pessoais.
+* Controle de Despesas: Página dedicada ao registro e acompanhamento detalhado das despesas, oferecendo uma visão clara dos gastos.
+* Gestão de Categorias de Despesas: Recurso que permite categorizar e organizar as despesas de acordo com diferentes tipos, facilitando a análise.
+* Controle de Contas Bancárias: Página destinada ao gerenciamento de contas bancárias, proporcionando uma visão consolidada dos saldos e transações.
+* Estatísticas Simplificadas com Gráficos: Apresentação visual de estatísticas financeiras por meio de gráficos, proporcionando insights rápidos e eficazes.
 
 ### Tecnologias
 <p display="inline-block">
