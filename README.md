@@ -1,4 +1,4 @@
-<h1 align="center">Gerenciamento de despesas</h1>
+<h1 align="center">Controle de Finanças Pessoais</h1>
 
 ##  Sobre o projeto
 
